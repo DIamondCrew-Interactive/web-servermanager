@@ -1,0 +1,7 @@
+# Public defaults verified against pterodactyl/panel v1.15.1 config/recaptcha.php.
+# package.cjs checks the full file hash in every release-history commit first.
+# No broad file/rule exclusion and no production credential is allowlisted.
+67b828163bbab7bd12e09dad7aae07412bcda702:config/recaptcha.php:generic-api-key:17
+67b828163bbab7bd12e09dad7aae07412bcda702:config/recaptcha.php:generic-api-key:18
+67b828163bbab7bd12e09dad7aae07412bcda702:config/recaptcha.php:generic-api-key:23
+67b828163bbab7bd12e09dad7aae07412bcda702:config/recaptcha.php:generic-api-key:24

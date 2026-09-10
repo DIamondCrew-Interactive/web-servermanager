@@ -1,0 +1,107 @@
+name: DiamondCrew release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diamondcrew-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the triggering tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node 22 for Pterodactyl 1.15.1
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Validate release tooling
+        run: node --test scripts/release/package.test.cjs
+      - name: Install checksum-verified Gitleaks
+        run: |
+          curl --fail --silent --show-error --location https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$RUNNER_TEMP/gitleaks.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks"
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Verify tag, panel version and source history
+        run: node scripts/release/package.cjs audit
+      - name: Secret scan release history
+        run: >-
+          gitleaks git . --log-opts=HEAD --redact --no-banner
+          --gitleaks-ignore-path scripts/release/public-defaults.gitleaksignore
+          --report-format json --report-path "$RUNNER_TEMP/history-scan.json"
+      - name: Install locked dependencies
+        run: |
+          npm install --global yarn@1.22.22
+          yarn install --frozen-lockfile --non-interactive
+      - name: Typecheck
+        run: npm run tsc
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test -- --runInBand
+      - name: Production build
+        run: npm run build:production
+      - name: Stage deployment files and validate release contents
+        run: node scripts/release/package.cjs stage
+      - name: Secret scan exact deployment contents
+        run: >-
+          gitleaks dir "$RUNNER_TEMP/diamondcrew-release/stage" --redact --no-banner
+          --max-archive-depth 2 --report-format json --report-path "$RUNNER_TEMP/asset-scan.json"
+      - name: Pack, validate archive and calculate SHA256
+        run: node scripts/release/package.cjs pack
+      - name: Preserve verified artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: diamondcrew-release
+          path: ${{ runner.temp }}/diamondcrew-release/output/*
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Download verified artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: diamondcrew-release
+          path: release-output
+      - name: Verify artifact transport
+        working-directory: release-output
+        run: sha256sum --check diamondcrew-server-manager-1.15.1.tar.gz.sha256
+      - name: Create draft release, upload assets and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          printf '%s\n' \
+            "DiamondCrew Server Manager $RELEASE_TAG — based on Pterodactyl 1.15.1." \
+            '' \
+            'Typecheck, lint, tests, production build, secret scans and release-content validation passed.' \
+            'The archive contains diamondcrew-build.json with product, basedOn, version and sourceCommit.' \
+            'Verify the attached SHA256 before deployment. Use this archive filename in the deployment instructions.' \
+            'History scan exceptions are limited to four verified public upstream reCAPTCHA defaults.' \
+            'This release does not deploy to any server.' > release-notes.md
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "DiamondCrew Server Manager $RELEASE_TAG" --notes-file release-notes.md
+          gh release upload "$RELEASE_TAG" release-output/*
+          test "$(gh release view "$RELEASE_TAG" --json assets --jq '.assets | length')" = 3
+          gh release edit "$RELEASE_TAG" --draft=false
