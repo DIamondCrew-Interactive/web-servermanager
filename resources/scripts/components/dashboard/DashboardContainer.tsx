@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Server } from '@/api/server/getServer';
 import getServers from '@/api/getServers';
-import ServerRow from '@/components/dashboard/ServerRow';
+import Overview from '@/components/dashboard/diamondcrew/Overview';
 import Spinner from '@/components/elements/Spinner';
 import PageContentBlock from '@/components/elements/PageContentBlock';
 import useFlash from '@/plugins/useFlash';
@@ -11,7 +11,6 @@ import Switch from '@/components/elements/Switch';
 import tw from 'twin.macro';
 import useSWR from 'swr';
 import { PaginatedResult } from '@/api/http';
-import Pagination from '@/components/elements/Pagination';
 import { useLocation } from 'react-router-dom';
 
 export default () => {
@@ -22,6 +21,7 @@ export default () => {
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const uuid = useStoreState((state) => state.user.data!.uuid);
     const rootAdmin = useStoreState((state) => state.user.data!.rootAdmin);
+    const username = useStoreState((state) => state.user.data!.username);
     const [showOnlyAdmin, setShowOnlyAdmin] = usePersistedState(`${uuid}:show_all_servers`, false);
 
     const { data: servers, error } = useSWR<PaginatedResult<Server>>(
@@ -53,13 +53,15 @@ export default () => {
     }, [error]);
 
     return (
-        <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
-            <div css={tw`mb-8`}>
+        <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'} className={'dc-dashboard'}>
+            <div className={'dc-dashboard-intro'}>
                 <h1 css={tw`text-3xl text-neutral-50 mb-2`}>Dashboard</h1>
-                <p css={tw`text-neutral-300`}>Manage your servers with DiamondCrew Server Manager.</p>
+                <p css={tw`text-neutral-300`}>
+                    Welcome back, {username}! Here&apos;s an overview of your server infrastructure.
+                </p>
             </div>
             {rootAdmin && (
-                <div css={tw`mb-2 flex justify-end items-center`}>
+                <div className={'dc-dashboard-filter'}>
                     <p css={tw`uppercase text-xs text-neutral-400 mr-2`}>
                         {showOnlyAdmin ? "Showing others' servers" : 'Showing your servers'}
                     </p>
@@ -73,21 +75,12 @@ export default () => {
             {!servers ? (
                 <Spinner centered size={'large'} />
             ) : (
-                <Pagination data={servers} onPageSelect={setPage}>
-                    {({ items }) =>
-                        items.length > 0 ? (
-                            items.map((server, index) => (
-                                <ServerRow key={server.uuid} server={server} css={index > 0 ? tw`mt-2` : undefined} />
-                            ))
-                        ) : (
-                            <p css={tw`text-center text-sm text-neutral-400`}>
-                                {showOnlyAdmin
-                                    ? 'There are no other servers to display.'
-                                    : 'There are no servers associated with your account.'}
-                            </p>
-                        )
-                    }
-                </Pagination>
+                <Overview
+                    key={`${page}:${showOnlyAdmin}`}
+                    servers={servers}
+                    onPageSelect={setPage}
+                    showOnlyAdmin={!!showOnlyAdmin}
+                />
             )}
         </PageContentBlock>
     );

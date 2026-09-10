@@ -19,13 +19,25 @@ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey
     return (
         <CSSTransition timeout={150} classNames={'fade'} appear in>
             <>
-                <ContentContainer css={tw`my-4 sm:my-10`} className={className}>
+                <ContentContainer css={tw`my-4 sm:my-10`} className={`dc-page ${className || ''}`}>
                     {showFlashKey && <FlashMessageRender byKey={showFlashKey} css={tw`mb-4`} />}
                     {children}
                 </ContentContainer>
-                <ContentContainer css={tw`mb-4`}>
+                <ContentContainer css={tw`mb-4`} className={'dc-page-footer'}>
                     <p className={'dc-footer'}>
-                        {BRAND_NAME} &middot; &copy; {new Date().getFullYear()} DiamondCrew Interactive
+                        <span>
+                            &copy; {new Date().getFullYear()}{' '}
+                            <span className={'dc-gradient-text'}>DiamondCrew Interactive.</span> All rights reserved.
+                        </span>
+                        <span>
+                            Powered by <span className={'dc-gradient-text'}>DiamondCrew</span> Server Manager{' '}
+                            <img
+                                src={'/branding/diamondcrew/diamond-circle-logo.png'}
+                                width={32}
+                                height={32}
+                                alt={''}
+                            />
+                        </span>
                     </p>
                 </ContentContainer>
             </>

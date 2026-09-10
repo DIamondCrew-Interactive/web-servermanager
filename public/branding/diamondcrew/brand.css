@@ -1,4 +1,5 @@
 /* Shared React + Blade identity. Colors are generated from resources/diamondcrew/tokens.json. */
+.dc-gradient-text { background: var(--dc-gradient); background-clip: text; -webkit-background-clip: text; color: transparent; font-weight: 600; }
 .dc-brand { display: inline-flex; align-items: center; gap: 12px; vertical-align: middle; text-align: left; line-height: 1.2; }
 .dc-brand img { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0; }
 .dc-brand__copy { display: flex; flex-direction: column; gap: 3px; }
