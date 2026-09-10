@@ -1,7 +1,7 @@
 import styled from 'styled-components/macro';
 import tw, { theme } from 'twin.macro';
 
-const SubNavigation = styled.div`
+const SubNavigation = styled.div.attrs({ className: 'dc-subnav' })`
     ${tw`w-full bg-neutral-900 border-b border-neutral-600 overflow-x-auto`};
 
     & > div {

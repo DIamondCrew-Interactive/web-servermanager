@@ -1,5 +1,65 @@
 # DiamondCrew Server Manager — reskin Pterodactyl 1.15.1
 
+## Reference dashboard — v1.1.0
+
+Tato iterace na větvi `design/reference-dashboard` přibližuje klientský dashboard
+dodané předloze. Pterodactyl zůstává na **1.15.1**. Nemění backend, API routes,
+datové modely, autentizaci ani oprávnění. Verze této iterace je v1.1.0;
+existující release v1.0.1 není přepsaný. Release automatizace nic nenasazuje.
+
+- Pevný header (102 px), levý sidebar (252 px), mobilní vysouvací navigace,
+  původní vyhledávací dialog a logout, uživatelský profil a patička.
+- Čtyři souhrnné karty, přehled serverů, souhrn prostředků, aktivita účtu a síťový
+  graf. Obrysové ikony používají již instalované Heroicons.
+- Vlastní lokální SVG náhledy Minecraft/FiveM/Rust/Source a obecný fallback.
+  Nejde o oficiální obaly her. Výběr a ruční UUID override:
+  `resources/scripts/components/branding/serverArtwork.ts`; assety:
+  `public/branding/diamondcrew/games/` (včetně návodu k vlastním obrázkům).
+- Geometrické dekorace: `header-shards.svg`, `sidebar-shards.svg` ve stejném
+  branding adresáři. Žádné base64 obrázky nebo externí image služby.
+- Sdílený theme zdroj: `resources/diamondcrew/tokens.json`; obsahuje také rozměry
+  shellu a cyan/purple akcenty. `client.css`, `admin.css`, `brand.css` obsahují
+  prezentační pravidla. AdminLTE zachovává své menu a funkce, přebírá geometrii
+  headeru/sidebaru. Serverové záložky zachovávají své původní permission guards.
+
+### Skutečná data a rozdíly proti předloze
+
+Předloha spojuje informace administrace a klienta, které původní klientské API
+neposkytuje pohromadě. Žádná čísla se proto nevymýšlejí. Karty zobrazují celkový
+počet serverů dostupných v aktuálním režimu, běžící servery na stránce, uzly na
+stránce a rozpoznané typy serverů. Nejde o globální počty uživatelů/nestů ani o
+monitoring samotného hostitele DIA-01. Ostatní souhrny výslovně uvádějí rozsah
+aktuální stránky a počet serverů, které odpověděly. Stránkování a admin přepínač
+vlastních/cizích serverů zůstávají funkční.
+
+Existující resource endpoint se načítá jednou pro každý server aktuální stránky
+po dokončení předchozího cyklu, každých 30 sekund. Skrytá karta neprovádí nové
+cykly; při odchodu se časovač zruší. Chyby mají explicitní stav, nikoli falešné
+„Running“. Hodnoty CPU, RAM a disku jsou skutečné; neomezené limity se nedělí nulou.
+Síťový graf počítá rychlost z rozdílu kumulativních čítačů a skutečně uplynulého
+času. První dvě měření potřebují čas; zobrazuje se stav sběru dat. Výpadek, reset
+čítače nebo restart vytvoří mezeru. Historie je pouze v aktuální relaci (40 vzorků),
+nikoli smyšlený historický graf. Aktivita je skutečný původní log účtu, ne globální
+log všech serverů. Počty hráčů nejsou původním API dostupné a nezobrazují se.
+
+### Ověření této iterace
+
+Typecheck, lint, production build a 51 Jest testů prošly. Nové testy ověřují
+výpočet přenosu, výpadky/restarty a přiřazení herního artworku. Chromium ověřil
+produkční bundle na 1536 a 390 px, herní obrázky, hledání, mobilní menu/klávesu
+Escape, dostupnost odhlášení, chybové stavy a skrytí admin odkazů běžnému účtu.
+Prošly i původní kontroly loginu, 2FA/recovery/resetu a AdminLTE Select2/SweetAlert.
+Browser kontroly používají lokální testovací API odpovědi; nejsou důkazem živé
+integrace Laravel/Wings. PHP zde není dostupné. Screenshoty a logy jsou pouze
+v ignorovaném `.diamondcrew-backup/`, nikoli v produkčním balíku.
+
+Seznam souborů, baseline SHA256 i upstream patch byly aktualizovány pro tuto
+iteraci; release automatizace tak zahrne nové assety a komponenty při budoucím
+autorizovaném releasu. Build a deployment postup níže zůstává platný. Název
+automatizovaného assetu je `diamondcrew-server-manager-1.15.1.tar.gz`.
+Pro rollback již nasazeného designu použijte předchozí frontend zálohu se stejným
+manifestem; při publikování této iterace zachovejte možnost návratu na v1.0.1.
+
 ## Výchozí zdroj a rozsah
 
 Verze v `config/app.php`: **1.15.1**. Dodaný adresář je release snapshot bez `.git`,

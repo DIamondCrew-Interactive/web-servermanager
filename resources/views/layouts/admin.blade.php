@@ -58,6 +58,7 @@
                             </li>
                         </ul>
                     </div>
+                    <div class="dc-admin-header-art" aria-hidden="true">PLAY<br>CREATE<br>TOGETHER</div>
                 </nav>
             </header>
             <aside class="main-sidebar">
@@ -117,6 +118,11 @@
                             </a>
                         </li>
                     </ul>
+                    <div class="dc-admin-sidebar-brand" aria-hidden="true">
+                        <img src="/branding/diamondcrew/diamond-circle-logo.png" width="74" height="74" alt="">
+                        <span class="dc-gradient-text">DiamondCrew<br>Interactive</span>
+                        <small>GAME SERVERS<br>WITHOUT LIMITS</small>
+                    </div>
                 </section>
             </aside>
             <div class="content-wrapper">

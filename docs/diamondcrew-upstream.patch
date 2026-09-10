@@ -32,43 +32,173 @@ index ddade2c..b17ec36 100644
 +    'copyright' => '&copy; :year DiamondCrew Server Manager',
  ];
 diff --git a/resources/scripts/components/NavigationBar.tsx b/resources/scripts/components/NavigationBar.tsx
-index 6142f62..8c0ef6c 100644
+index 6142f62..45eeccc 100644
 --- a/resources/scripts/components/NavigationBar.tsx
 +++ b/resources/scripts/components/NavigationBar.tsx
-@@ -12,6 +12,7 @@ import http from '@/api/http';
+@@ -1,92 +1,91 @@
+-import * as React from 'react';
+-import { useState } from 'react';
+-import { Link, NavLink } from 'react-router-dom';
+-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+-import { faCogs, faLayerGroup, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
++import React, { useEffect, useState } from 'react';
++import { Link, useLocation } from 'react-router-dom';
+ import { useStoreState } from 'easy-peasy';
+ import { ApplicationStore } from '@/state';
+ import SearchContainer from '@/components/dashboard/search/SearchContainer';
+-import tw, { theme } from 'twin.macro';
+-import styled from 'styled-components/macro';
+ import http from '@/api/http';
  import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
- import Tooltip from '@/components/elements/tooltip/Tooltip';
- import Avatar from '@/components/Avatar';
+-import Tooltip from '@/components/elements/tooltip/Tooltip';
+-import Avatar from '@/components/Avatar';
+-
+-const RightNavigation = styled.div`
+-    & > a,
+-    & > button,
+-    & > .navigation-link {
+-        ${tw`flex items-center h-full no-underline text-neutral-300 px-6 cursor-pointer transition-all duration-150`};
+-
+-        &:active,
+-        &:hover {
+-            ${tw`text-neutral-100 bg-black`};
+-        }
+-
+-        &:active,
+-        &:hover,
+-        &.active {
+-            box-shadow: inset 0 -2px ${theme`colors.cyan.600`.toString()};
+-        }
+-    }
+-`;
 +import Brand from '@/components/branding/Brand';
- 
- const RightNavigation = styled.div`
-     & > a,
-@@ -33,7 +34,6 @@ const RightNavigation = styled.div`
- `;
- 
++import Sidebar from '@/components/branding/Sidebar';
++import Icon from '@/components/branding/Icons';
+
  export default () => {
 -    const name = useStoreState((state: ApplicationStore) => state.settings.data!.name);
-     const rootAdmin = useStoreState((state: ApplicationStore) => state.user.data!.rootAdmin);
+-    const rootAdmin = useStoreState((state: ApplicationStore) => state.user.data!.rootAdmin);
++    const user = useStoreState((state: ApplicationStore) => state.user.data!);
      const [isLoggingOut, setIsLoggingOut] = useState(false);
- 
-@@ -46,7 +46,7 @@ export default () => {
+-
++    const [open, setOpen] = useState(false);
++    const { pathname } = useLocation();
++    useEffect(() => {
++        document.body.classList.add('dc-shell');
++        return () => document.body.classList.remove('dc-shell');
++    }, []);
++    useEffect(() => setOpen(false), [pathname]);
++    useEffect(() => {
++        const close = (event: KeyboardEvent) => {
++            if (event.key === 'Escape') setOpen(false);
++        };
++        window.addEventListener('keydown', close);
++        return () => window.removeEventListener('keydown', close);
++    }, []);
+     const onTriggerLogout = () => {
+         setIsLoggingOut(true);
+         http.post('/auth/logout').finally(() => {
+-            // @ts-expect-error this is valid
+-            window.location = '/';
++            window.location.assign('/');
+         });
      };
- 
+-
      return (
 -        <div className={'w-full bg-neutral-900 shadow-md overflow-x-auto'}>
-+        <div className={'dc-header w-full bg-neutral-900 shadow-md overflow-x-auto'}>
-             <SpinnerOverlay visible={isLoggingOut} />
-             <div className={'mx-auto w-full flex items-center h-[3.5rem] max-w-[1200px]'}>
-                 <div id={'logo'} className={'flex-1'}>
-@@ -56,7 +56,7 @@ export default () => {
-                             'text-2xl font-header font-medium px-4 no-underline text-neutral-200 hover:text-neutral-100 transition-colors duration-150'
-                         }
+-            <SpinnerOverlay visible={isLoggingOut} />
+-            <div className={'mx-auto w-full flex items-center h-[3.5rem] max-w-[1200px]'}>
+-                <div id={'logo'} className={'flex-1'}>
++        <>
++            <header className={'dc-header'}>
++                <SpinnerOverlay visible={isLoggingOut} />
++                <button
++                    className={'dc-menu-toggle'}
++                    aria-label={'Toggle navigation'}
++                    aria-controls={'dc-sidebar'}
++                    aria-expanded={open}
++                    onClick={() => setOpen(!open)}
++                >
++                    <Icon name={open ? 'close' : 'menu'} />
++                </button>
++                <Link to={'/'} className={'dc-header-brand'}>
++                    <Brand />
++                </Link>
++                <SearchContainer />
++                <div className={'dc-header-account'}>
+                     <Link
+-                        to={'/'}
+-                        className={
+-                            'text-2xl font-header font-medium px-4 no-underline text-neutral-200 hover:text-neutral-100 transition-colors duration-150'
+-                        }
++                        to={'/account/activity'}
++                        className={'dc-header-activity'}
++                        aria-label={'Account activity'}
++                        title={'Account activity'}
                      >
 -                        {name}
-+                        <Brand />
++                        <Icon name={'bell'} />
++                    </Link>
++                    <Link to={'/account'} className={'dc-user'}>
++                        <span className={'dc-avatar'}>{user.username.slice(0, 2).toUpperCase()}</span>
++                        <span className={'dc-user-copy'}>
++                            <strong>{user.username}</strong>
++                            <small>{user.rootAdmin ? 'Administrator' : 'Server Manager'}</small>
++                        </span>
++                        <Icon name={'chevron'} />
                      </Link>
++                    <button
++                        onClick={onTriggerLogout}
++                        className={'dc-logout'}
++                        aria-label={'Sign Out'}
++                        title={'Sign Out'}
++                    >
++                        <Icon name={'logout'} />
++                    </button>
++                </div>
++                <div className={'dc-header-art'} aria-hidden={'true'}>
++                    <span>
++                        PLAY
++                        <br />
++                        CREATE
++                        <br />
++                        TOGETHER
++                    </span>
                  </div>
-                 <RightNavigation className={'flex h-full items-center justify-center'}>
+-                <RightNavigation className={'flex h-full items-center justify-center'}>
+-                    <SearchContainer />
+-                    <Tooltip placement={'bottom'} content={'Dashboard'}>
+-                        <NavLink to={'/'} exact>
+-                            <FontAwesomeIcon icon={faLayerGroup} />
+-                        </NavLink>
+-                    </Tooltip>
+-                    {rootAdmin && (
+-                        <Tooltip placement={'bottom'} content={'Admin'}>
+-                            <a href={'/admin'} rel={'noreferrer'}>
+-                                <FontAwesomeIcon icon={faCogs} />
+-                            </a>
+-                        </Tooltip>
+-                    )}
+-                    <Tooltip placement={'bottom'} content={'Account Settings'}>
+-                        <NavLink to={'/account'}>
+-                            <span className={'flex items-center w-5 h-5'}>
+-                                <Avatar.User />
+-                            </span>
+-                        </NavLink>
+-                    </Tooltip>
+-                    <Tooltip placement={'bottom'} content={'Sign Out'}>
+-                        <button onClick={onTriggerLogout}>
+-                            <FontAwesomeIcon icon={faSignOutAlt} />
+-                        </button>
+-                    </Tooltip>
+-                </RightNavigation>
+-            </div>
+-        </div>
++            </header>
++            <Sidebar open={open} onClose={() => setOpen(false)} onLogout={onTriggerLogout} />
++        </>
+     );
+ };
 diff --git a/resources/scripts/components/auth/LoginFormContainer.tsx b/resources/scripts/components/auth/LoginFormContainer.tsx
 index 6274981..af57469 100644
 --- a/resources/scripts/components/auth/LoginFormContainer.tsx
@@ -81,11 +211,11 @@ index 6274981..af57469 100644
  import FlashMessageRender from '@/components/FlashMessageRender';
 +import Brand from '@/components/branding/Brand';
  import tw from 'twin.macro';
- 
+
  type Props = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> & {
      title?: string;
  };
- 
+
 -const Container = styled.div`
 -    ${breakpoint('sm')`
 -        ${tw`w-4/5 mx-auto`}
@@ -140,38 +270,394 @@ index 6274981..af57469 100644
 +    </div>
  ));
 diff --git a/resources/scripts/components/dashboard/DashboardContainer.tsx b/resources/scripts/components/dashboard/DashboardContainer.tsx
-index 23ad2e3..079b4f6 100644
+index 23ad2e3..e26ee09 100644
 --- a/resources/scripts/components/dashboard/DashboardContainer.tsx
 +++ b/resources/scripts/components/dashboard/DashboardContainer.tsx
-@@ -54,6 +54,10 @@ export default () => {
- 
+@@ -1,7 +1,7 @@
+ import React, { useEffect, useState } from 'react';
+ import { Server } from '@/api/server/getServer';
+ import getServers from '@/api/getServers';
+-import ServerRow from '@/components/dashboard/ServerRow';
++import Overview from '@/components/dashboard/diamondcrew/Overview';
+ import Spinner from '@/components/elements/Spinner';
+ import PageContentBlock from '@/components/elements/PageContentBlock';
+ import useFlash from '@/plugins/useFlash';
+@@ -11,7 +11,6 @@ import Switch from '@/components/elements/Switch';
+ import tw from 'twin.macro';
+ import useSWR from 'swr';
+ import { PaginatedResult } from '@/api/http';
+-import Pagination from '@/components/elements/Pagination';
+ import { useLocation } from 'react-router-dom';
+
+ export default () => {
+@@ -22,6 +21,7 @@ export default () => {
+     const { clearFlashes, clearAndAddHttpError } = useFlash();
+     const uuid = useStoreState((state) => state.user.data!.uuid);
+     const rootAdmin = useStoreState((state) => state.user.data!.rootAdmin);
++    const username = useStoreState((state) => state.user.data!.username);
+     const [showOnlyAdmin, setShowOnlyAdmin] = usePersistedState(`${uuid}:show_all_servers`, false);
+
+     const { data: servers, error } = useSWR<PaginatedResult<Server>>(
+@@ -53,9 +53,15 @@ export default () => {
+     }, [error]);
+
      return (
-         <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
-+            <div css={tw`mb-8`}>
+-        <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
++        <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'} className={'dc-dashboard'}>
++            <div className={'dc-dashboard-intro'}>
 +                <h1 css={tw`text-3xl text-neutral-50 mb-2`}>Dashboard</h1>
-+                <p css={tw`text-neutral-300`}>Manage your servers with DiamondCrew Server Manager.</p>
++                <p css={tw`text-neutral-300`}>
++                    Welcome back, {username}! Here&apos;s an overview of your server infrastructure.
++                </p>
 +            </div>
              {rootAdmin && (
-                 <div css={tw`mb-2 flex justify-end items-center`}>
+-                <div css={tw`mb-2 flex justify-end items-center`}>
++                <div className={'dc-dashboard-filter'}>
                      <p css={tw`uppercase text-xs text-neutral-400 mr-2`}>
+                         {showOnlyAdmin ? "Showing others' servers" : 'Showing your servers'}
+                     </p>
+@@ -69,21 +75,12 @@ export default () => {
+             {!servers ? (
+                 <Spinner centered size={'large'} />
+             ) : (
+-                <Pagination data={servers} onPageSelect={setPage}>
+-                    {({ items }) =>
+-                        items.length > 0 ? (
+-                            items.map((server, index) => (
+-                                <ServerRow key={server.uuid} server={server} css={index > 0 ? tw`mt-2` : undefined} />
+-                            ))
+-                        ) : (
+-                            <p css={tw`text-center text-sm text-neutral-400`}>
+-                                {showOnlyAdmin
+-                                    ? 'There are no other servers to display.'
+-                                    : 'There are no servers associated with your account.'}
+-                            </p>
+-                        )
+-                    }
+-                </Pagination>
++                <Overview
++                    key={`${page}:${showOnlyAdmin}`}
++                    servers={servers}
++                    onPageSelect={setPage}
++                    showOnlyAdmin={!!showOnlyAdmin}
++                />
+             )}
+         </PageContentBlock>
+     );
+diff --git a/resources/scripts/components/dashboard/ServerRow.tsx b/resources/scripts/components/dashboard/ServerRow.tsx
+index aa2b5a7..08d7f7d 100644
+--- a/resources/scripts/components/dashboard/ServerRow.tsx
++++ b/resources/scripts/components/dashboard/ServerRow.tsx
+@@ -1,182 +1,104 @@
+-import React, { memo, useEffect, useRef, useState } from 'react';
+-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+-import { faEthernet, faHdd, faMemory, faMicrochip, faServer } from '@fortawesome/free-solid-svg-icons';
++import React from 'react';
+ import { Link } from 'react-router-dom';
+ import { Server } from '@/api/server/getServer';
+-import getServerResourceUsage, { ServerPowerState, ServerStats } from '@/api/server/getServerResourceUsage';
++import { ServerStats } from '@/api/server/getServerResourceUsage';
+ import { bytesToString, ip, mbToBytes } from '@/lib/formatters';
+-import tw from 'twin.macro';
+-import GreyRowBox from '@/components/elements/GreyRowBox';
+-import Spinner from '@/components/elements/Spinner';
+-import styled from 'styled-components/macro';
+-import isEqual from 'react-fast-compare';
+-
+-// Determines if the current value is in an alarm threshold so we can show it in red rather
+-// than the more faded default style.
+-const isAlarmState = (current: number, limit: number): boolean => limit > 0 && current / (limit * 1024 * 1024) >= 0.9;
+-
+-const Icon = memo(
+-    styled(FontAwesomeIcon)<{ $alarm: boolean }>`
+-        ${(props) => (props.$alarm ? tw`text-red-400` : tw`text-neutral-500`)};
+-    `,
+-    isEqual
+-);
+-
+-const IconDescription = styled.p<{ $alarm: boolean }>`
+-    ${tw`text-sm ml-2`};
+-    ${(props) => (props.$alarm ? tw`text-white` : tw`text-neutral-400`)};
+-`;
+-
+-const StatusIndicatorBox = styled(GreyRowBox)<{ $status: ServerPowerState | undefined }>`
+-    ${tw`grid grid-cols-12 gap-4 relative`};
+-
+-    & .status-bar {
+-        ${tw`w-2 bg-red-500 absolute right-0 z-20 rounded-full m-1 opacity-50 transition-all duration-150`};
+-        height: calc(100% - 0.5rem);
+-
+-        ${({ $status }) =>
+-            !$status || $status === 'offline'
+-                ? tw`bg-red-500`
+-                : $status === 'running'
+-                ? tw`bg-green-500`
+-                : tw`bg-yellow-500`};
+-    }
+-
+-    &:hover .status-bar {
+-        ${tw`opacity-75`};
+-    }
+-`;
+-
+-type Timer = ReturnType<typeof setInterval>;
+-
+-export default ({ server, className }: { server: Server; className?: string }) => {
+-    const interval = useRef<Timer>(null) as React.MutableRefObject<Timer>;
+-    const [isSuspended, setIsSuspended] = useState(server.status === 'suspended');
+-    const [stats, setStats] = useState<ServerStats | null>(null);
+-
+-    const getStats = () =>
+-        getServerResourceUsage(server.uuid)
+-            .then((data) => setStats(data))
+-            .catch((error) => console.error(error));
+-
+-    useEffect(() => {
+-        setIsSuspended(stats?.isSuspended || server.status === 'suspended');
+-    }, [stats?.isSuspended, server.status]);
+-
+-    useEffect(() => {
+-        // Don't waste a HTTP request if there is nothing important to show to the user because
+-        // the server is suspended.
+-        if (isSuspended || server.isNodeUnderMaintenance) return;
+-
+-        getStats().then(() => {
+-            interval.current = setInterval(() => getStats(), 30000);
+-        });
+-
+-        return () => {
+-            interval.current && clearInterval(interval.current);
+-        };
+-    }, [isSuspended, server.isNodeUnderMaintenance]);
+-
+-    const alarms = { cpu: false, memory: false, disk: false };
+-    if (stats) {
+-        alarms.cpu = server.limits.cpu === 0 ? false : stats.cpuUsagePercent >= server.limits.cpu * 0.9;
+-        alarms.memory = isAlarmState(stats.memoryUsageInBytes, server.limits.memory);
+-        alarms.disk = server.limits.disk === 0 ? false : isAlarmState(stats.diskUsageInBytes, server.limits.disk);
+-    }
+-
+-    const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
+-    const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
+-    const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + ' %' : 'Unlimited';
+-
++import Icon from '@/components/branding/Icons';
++import { serverArtwork } from '@/components/branding/serverArtwork';
++import Meter from './diamondcrew/Meter';
++
++export default ({ server, stats }: { server: Server; stats: ServerStats | null | undefined }) => {
++    const art = serverArtwork(server);
++    const state =
++        server.status === 'suspended' || stats?.isSuspended
++            ? 'Suspended'
++            : server.isNodeUnderMaintenance
++            ? 'Under Maintenance'
++            : server.isTransferring
++            ? 'Transferring'
++            : server.status === 'installing'
++            ? 'Installing'
++            : server.status === 'restoring_backup'
++            ? 'Restoring Backup'
++            : server.status
++            ? 'Unavailable'
++            : stats === null
++            ? 'Connection Error'
++            : !stats
++            ? 'Connecting'
++            : { running: 'Running', offline: 'Offline', starting: 'Starting', stopping: 'Stopping' }[stats.status];
++    const available =
++        stats && !server.status && !server.isNodeUnderMaintenance && !server.isTransferring && !stats.isSuspended;
++    const allocation = server.allocations.find((a) => a.isDefault);
+     return (
+-        <StatusIndicatorBox as={Link} to={`/server/${server.id}`} className={className} $status={stats?.status}>
+-            <div css={tw`flex items-center col-span-12 sm:col-span-5 lg:col-span-6`}>
+-                <div className={'icon mr-4'}>
+-                    <FontAwesomeIcon icon={faServer} />
+-                </div>
+-                <div>
+-                    <p css={tw`text-lg break-words`}>{server.name}</p>
+-                    {!!server.description && (
+-                        <p css={tw`text-sm text-neutral-300 break-words line-clamp-2`}>{server.description}</p>
+-                    )}
++        <Link to={`/server/${server.id}`} className={'dc-server-row'}>
++            <img
++                className={'dc-server-art'}
++                src={art.image}
++                alt={art.label}
++                width={76}
++                height={76}
++                onError={(event) => {
++                    const image = event.currentTarget;
++                    if (!image.src.endsWith('/games/generic.svg'))
++                        image.src = '/branding/diamondcrew/games/generic.svg';
++                }}
++            />
++            <div className={'dc-server-info'}>
++                <h3>{server.name}</h3>
++                <div className={'dc-server-meta'}>
++                    <span
++                        className={`dc-status dc-status--${
++                            state === 'Running'
++                                ? 'online'
++                                : state === 'Offline' || state === 'Suspended' || state === 'Connection Error'
++                                ? 'offline'
++                                : 'pending'
++                        }`}
++                    >
++                        <i />
++                        {state}
++                    </span>
++                    <span>{art.label}</span>
+                 </div>
+-            </div>
+-            <div css={tw`flex-1 ml-4 lg:block lg:col-span-2 hidden`}>
+-                <div css={tw`flex justify-center`}>
+-                    <FontAwesomeIcon icon={faEthernet} css={tw`text-neutral-500`} />
+-                    <p css={tw`text-sm text-neutral-400 ml-2`}>
+-                        {server.allocations
+-                            .filter((alloc) => alloc.isDefault)
+-                            .map((allocation) => (
+-                                <React.Fragment key={allocation.ip + allocation.port.toString()}>
+-                                    {allocation.alias || ip(allocation.ip)}:{allocation.port}
+-                                </React.Fragment>
+-                            ))}
++                <p className={'dc-server-address'}>
++                    <Icon name={'server'} />
++                    {allocation ? `${allocation.alias || ip(allocation.ip)}:${allocation.port}` : 'No allocation'}
++                </p>
++                {server.description && (
++                    <p className={'dc-server-description'} title={server.description}>
++                        {server.description}
+                     </p>
+-                </div>
++                )}
+             </div>
+-            <div css={tw`hidden col-span-7 lg:col-span-4 sm:flex items-baseline justify-center`}>
+-                {!stats || isSuspended || server.isNodeUnderMaintenance ? (
+-                    isSuspended ? (
+-                        <div css={tw`flex-1 text-center`}>
+-                            <span css={tw`bg-red-500 rounded px-2 py-1 text-red-100 text-xs`}>
+-                                {server.status === 'suspended' ? 'Suspended' : 'Connection Error'}
+-                            </span>
+-                        </div>
+-                    ) : server.isNodeUnderMaintenance ? (
+-                        <div css={tw`flex-1 text-center`}>
+-                            <span css={tw`bg-yellow-500 rounded px-2 py-1 text-yellow-100 text-xs`}>
+-                                Under Maintenance
+-                            </span>
+-                        </div>
+-                    ) : server.isTransferring || server.status ? (
+-                        <div css={tw`flex-1 text-center`}>
+-                            <span css={tw`bg-neutral-500 rounded px-2 py-1 text-neutral-100 text-xs`}>
+-                                {server.isTransferring
+-                                    ? 'Transferring'
+-                                    : server.status === 'installing'
+-                                    ? 'Installing'
+-                                    : server.status === 'restoring_backup'
+-                                    ? 'Restoring Backup'
+-                                    : 'Unavailable'}
+-                            </span>
+-                        </div>
+-                    ) : (
+-                        <Spinner size={'small'} />
+-                    )
++            <div className={'dc-server-meters'}>
++                {available ? (
++                    <>
++                        <Meter
++                            label={'CPU'}
++                            value={stats.cpuUsagePercent}
++                            limit={server.limits.cpu}
++                            text={`${stats.cpuUsagePercent.toFixed(1)}% / ${server.limits.cpu || 'Unlimited'}${
++                                server.limits.cpu ? '%' : ''
++                            }`}
++                        />
++                        <Meter
++                            label={'Memory'}
++                            value={stats.memoryUsageInBytes}
++                            limit={mbToBytes(server.limits.memory)}
++                            text={`${bytesToString(stats.memoryUsageInBytes)} / ${
++                                server.limits.memory ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited'
++                            }`}
++                        />
++                        <p className={'dc-row-disk'}>
++                            Disk {bytesToString(stats.diskUsageInBytes)} /{' '}
++                            {server.limits.disk ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited'}
++                        </p>
++                    </>
+                 ) : (
+-                    <React.Fragment>
+-                        <div css={tw`flex-1 ml-4 sm:block hidden`}>
+-                            <div css={tw`flex justify-center`}>
+-                                <Icon icon={faMicrochip} $alarm={alarms.cpu} />
+-                                <IconDescription $alarm={alarms.cpu}>
+-                                    {stats.cpuUsagePercent.toFixed(2)} %
+-                                </IconDescription>
+-                            </div>
+-                            <p css={tw`text-xs text-neutral-600 text-center mt-1`}>of {cpuLimit}</p>
+-                        </div>
+-                        <div css={tw`flex-1 ml-4 sm:block hidden`}>
+-                            <div css={tw`flex justify-center`}>
+-                                <Icon icon={faMemory} $alarm={alarms.memory} />
+-                                <IconDescription $alarm={alarms.memory}>
+-                                    {bytesToString(stats.memoryUsageInBytes)}
+-                                </IconDescription>
+-                            </div>
+-                            <p css={tw`text-xs text-neutral-600 text-center mt-1`}>of {memoryLimit}</p>
+-                        </div>
+-                        <div css={tw`flex-1 ml-4 sm:block hidden`}>
+-                            <div css={tw`flex justify-center`}>
+-                                <Icon icon={faHdd} $alarm={alarms.disk} />
+-                                <IconDescription $alarm={alarms.disk}>
+-                                    {bytesToString(stats.diskUsageInBytes)}
+-                                </IconDescription>
+-                            </div>
+-                            <p css={tw`text-xs text-neutral-600 text-center mt-1`}>of {diskLimit}</p>
+-                        </div>
+-                    </React.Fragment>
++                    <p className={'dc-empty'}>{state}</p>
+                 )}
+             </div>
+-            <div className={'status-bar'} />
+-        </StatusIndicatorBox>
++        </Link>
+     );
+ };
+diff --git a/resources/scripts/components/dashboard/search/SearchContainer.tsx b/resources/scripts/components/dashboard/search/SearchContainer.tsx
+index 4da0f3a..9710a30 100644
+--- a/resources/scripts/components/dashboard/search/SearchContainer.tsx
++++ b/resources/scripts/components/dashboard/search/SearchContainer.tsx
+@@ -20,9 +20,10 @@ export default () => {
+         <>
+             {visible && <SearchModal appear visible={visible} onDismissed={() => setVisible(false)} />}
+             <Tooltip placement={'bottom'} content={'Search'}>
+-                <div className={'navigation-link'} onClick={() => setVisible(true)}>
++                <button type={'button'} className={'dc-search'} onClick={() => setVisible(true)}>
+                     <FontAwesomeIcon icon={faSearch} />
+-                </div>
++                    <span>Search servers...</span>
++                </button>
+             </Tooltip>
+         </>
+     );
 diff --git a/resources/scripts/components/elements/DropdownMenu.tsx b/resources/scripts/components/elements/DropdownMenu.tsx
 index 0c5361a..6ab3e3c 100644
 --- a/resources/scripts/components/elements/DropdownMenu.tsx
 +++ b/resources/scripts/components/elements/DropdownMenu.tsx
 @@ -9,11 +9,11 @@ interface Props {
  }
- 
+
  export const DropdownButtonRow = styled.button<{ danger?: boolean }>`
 -    ${tw`p-2 flex items-center rounded w-full text-neutral-500`};
 +    ${tw`p-2 flex items-center rounded w-full text-neutral-200`};
      transition: 150ms all ease;
- 
+
      &:hover {
 -        ${(props) => (props.danger ? tw`text-red-700 bg-red-100` : tw`text-neutral-700 bg-neutral-100`)};
 +        ${(props) => (props.danger ? tw`text-red-200 bg-red-900` : tw`text-neutral-100 bg-neutral-700`)};
      }
  `;
- 
+
 @@ -94,7 +94,7 @@ class DropdownMenu extends React.PureComponent<Props, State> {
                              this.setState({ visible: false });
                          }}
@@ -187,13 +673,13 @@ index e5a7f96..e18daf0 100644
 +++ b/resources/scripts/components/elements/GreyRowBox.tsx
 @@ -2,11 +2,11 @@ import styled from 'styled-components/macro';
  import tw from 'twin.macro';
- 
+
  export default styled.div<{ $hoverable?: boolean }>`
 -    ${tw`flex rounded no-underline text-neutral-200 items-center bg-neutral-700 p-4 border border-transparent transition-colors duration-150 overflow-hidden`};
 +    ${tw`flex rounded-lg no-underline text-neutral-200 items-center bg-neutral-800 p-4 border border-neutral-600 transition-colors duration-150 overflow-hidden`};
- 
+
      ${(props) => props.$hoverable !== false && tw`hover:border-neutral-500`};
- 
+
      & .icon {
 -        ${tw`rounded-full w-16 flex items-center justify-center bg-neutral-500 p-3`};
 +        ${tw`rounded-lg w-16 flex items-center justify-center bg-neutral-900 text-primary-400 p-3`};
@@ -205,35 +691,35 @@ index 677a501..ef2d63d 100644
 +++ b/resources/scripts/components/elements/Input.tsx
 @@ -7,13 +7,13 @@ export interface Props {
  }
- 
+
  const light = css<Props>`
 -    ${tw`bg-white border-neutral-200 text-neutral-800`};
 +    ${tw`bg-neutral-900 border-neutral-600 text-neutral-100`};
      &:focus {
          ${tw`border-primary-400`}
      }
- 
+
      &:disabled {
 -        ${tw`bg-neutral-100 border-neutral-200`};
 +        ${tw`bg-neutral-800 border-neutral-600`};
      }
  `;
- 
+
 diff --git a/resources/scripts/components/elements/Label.tsx b/resources/scripts/components/elements/Label.tsx
 index 704e832..8da77cd 100644
 --- a/resources/scripts/components/elements/Label.tsx
 +++ b/resources/scripts/components/elements/Label.tsx
 @@ -3,7 +3,7 @@ import tw from 'twin.macro';
- 
+
  const Label = styled.label<{ isLight?: boolean }>`
      ${tw`block text-xs uppercase text-neutral-200 mb-1 sm:mb-2`};
 -    ${(props) => props.isLight && tw`text-neutral-700`};
 +    ${(props) => props.isLight && tw`text-neutral-200`};
  `;
- 
+
  export default Label;
 diff --git a/resources/scripts/components/elements/PageContentBlock.tsx b/resources/scripts/components/elements/PageContentBlock.tsx
-index a4df195..53d7dfd 100644
+index a4df195..9549812 100644
 --- a/resources/scripts/components/elements/PageContentBlock.tsx
 +++ b/resources/scripts/components/elements/PageContentBlock.tsx
 @@ -3,6 +3,7 @@ import ContentContainer from '@/components/elements/ContentContainer';
@@ -241,11 +727,11 @@ index a4df195..53d7dfd 100644
  import tw from 'twin.macro';
  import FlashMessageRender from '@/components/FlashMessageRender';
 +import { BRAND_NAME } from '@/components/branding/Brand';
- 
+
  export interface PageContentBlockProps {
      title?: string;
-@@ -12,9 +13,7 @@ export interface PageContentBlockProps {
- 
+@@ -12,29 +13,31 @@ export interface PageContentBlockProps {
+
  const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey, className, children }) => {
      useEffect(() => {
 -        if (title) {
@@ -253,12 +739,16 @@ index a4df195..53d7dfd 100644
 -        }
 +        document.title = title ? `${title} | ${BRAND_NAME}` : BRAND_NAME;
      }, [title]);
- 
+
      return (
-@@ -25,16 +24,8 @@ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey
+         <CSSTransition timeout={150} classNames={'fade'} appear in>
+             <>
+-                <ContentContainer css={tw`my-4 sm:my-10`} className={className}>
++                <ContentContainer css={tw`my-4 sm:my-10`} className={`dc-page ${className || ''}`}>
+                     {showFlashKey && <FlashMessageRender byKey={showFlashKey} css={tw`mb-4`} />}
                      {children}
                  </ContentContainer>
-                 <ContentContainer css={tw`mb-4`}>
+-                <ContentContainer css={tw`mb-4`}>
 -                    <p css={tw`text-center text-neutral-500 text-xs`}>
 -                        <a
 -                            rel={'noopener nofollow noreferrer'}
@@ -269,8 +759,21 @@ index a4df195..53d7dfd 100644
 -                            Pterodactyl&reg;
 -                        </a>
 -                        &nbsp;&copy; 2015 - {new Date().getFullYear()}
++                <ContentContainer css={tw`mb-4`} className={'dc-page-footer'}>
 +                    <p className={'dc-footer'}>
-+                        {BRAND_NAME} &middot; &copy; {new Date().getFullYear()} DiamondCrew Interactive
++                        <span>
++                            &copy; {new Date().getFullYear()}{' '}
++                            <span className={'dc-gradient-text'}>DiamondCrew Interactive.</span> All rights reserved.
++                        </span>
++                        <span>
++                            Powered by <span className={'dc-gradient-text'}>DiamondCrew</span> Server Manager{' '}
++                            <img
++                                src={'/branding/diamondcrew/diamond-circle-logo.png'}
++                                width={32}
++                                height={32}
++                                alt={''}
++                            />
++                        </span>
                      </p>
                  </ContentContainer>
              </>
@@ -299,20 +802,22 @@ index 0b57e92..5f79485 100644
          </div>
      </PageContentBlock>
 diff --git a/resources/scripts/components/elements/SubNavigation.tsx b/resources/scripts/components/elements/SubNavigation.tsx
-index 9a25b80..164bb62 100644
+index 9a25b80..0bbc89e 100644
 --- a/resources/scripts/components/elements/SubNavigation.tsx
 +++ b/resources/scripts/components/elements/SubNavigation.tsx
-@@ -2,7 +2,7 @@ import styled from 'styled-components/macro';
+@@ -1,8 +1,8 @@
+ import styled from 'styled-components/macro';
  import tw, { theme } from 'twin.macro';
- 
- const SubNavigation = styled.div`
+
+-const SubNavigation = styled.div`
 -    ${tw`w-full bg-neutral-700 shadow overflow-x-auto`};
++const SubNavigation = styled.div.attrs({ className: 'dc-subnav' })`
 +    ${tw`w-full bg-neutral-900 border-b border-neutral-600 overflow-x-auto`};
- 
+
      & > div {
          ${tw`flex items-center text-sm mx-auto px-2`};
 @@ -22,8 +22,9 @@ const SubNavigation = styled.div`
- 
+
              &:active,
              &.active {
 -                ${tw`text-neutral-100`};
@@ -329,7 +834,7 @@ index e135549..24ae598 100644
 +++ b/resources/scripts/components/elements/TitledGreyBox.tsx
 @@ -12,8 +12,8 @@ interface Props {
  }
- 
+
  const TitledGreyBox = ({ icon, title, children, className }: Props) => (
 -    <div css={tw`rounded shadow-md bg-neutral-700`} className={className}>
 -        <div css={tw`bg-neutral-900 rounded-t p-3 border-b border-black`}>
@@ -344,13 +849,13 @@ index 6e78fd4..11d80dc 100644
 +++ b/resources/scripts/components/elements/dialog/style.module.css
 @@ -3,7 +3,7 @@
  }
- 
+
  .panel {
 -    @apply relative bg-gray-600 rounded max-w-xl w-full mx-auto shadow-lg text-left;
 +    @apply relative bg-gray-800 border border-gray-600 rounded-lg max-w-xl w-full mx-auto shadow-lg text-left;
      @apply ring-4 ring-gray-800 ring-opacity-80;
  }
- 
+
 diff --git a/resources/scripts/components/server/console/StatGraphs.tsx b/resources/scripts/components/server/console/StatGraphs.tsx
 index 9af405b..d7aa595 100644
 --- a/resources/scripts/components/server/console/StatGraphs.tsx
@@ -366,6 +871,32 @@ index 9af405b..d7aa595 100644
              };
          },
      });
+diff --git a/resources/scripts/routers/ServerRouter.tsx b/resources/scripts/routers/ServerRouter.tsx
+index 2976cf7..3511c52 100644
+--- a/resources/scripts/routers/ServerRouter.tsx
++++ b/resources/scripts/routers/ServerRouter.tsx
+@@ -20,6 +20,7 @@ import { useLocation } from 'react-router';
+ import ConflictStateRenderer from '@/components/server/ConflictStateRenderer';
+ import PermissionRoute from '@/components/elements/PermissionRoute';
+ import routes from '@/routers/routes';
++import Icon, { serverRouteIcons } from '@/components/branding/Icons';
+
+ export default () => {
+     const match = useRouteMatch<{ id: string }>();
+@@ -82,11 +83,13 @@ export default () => {
+                                         route.permission ? (
+                                             <Can key={route.path} action={route.permission} matchAny>
+                                                 <NavLink to={to(route.path, true)} exact={route.exact}>
++                                                    <Icon name={serverRouteIcons[route.name!] || 'server'} />
+                                                     {route.name}
+                                                 </NavLink>
+                                             </Can>
+                                         ) : (
+                                             <NavLink key={route.path} to={to(route.path, true)} exact={route.exact}>
++                                                <Icon name={serverRouteIcons[route.name!] || 'server'} />
+                                                 {route.name}
+                                             </NavLink>
+                                         )
 diff --git a/resources/views/admin/index.blade.php b/resources/views/admin/index.blade.php
 index 9652532..f0747f1 100644
 --- a/resources/views/admin/index.blade.php
@@ -398,7 +929,7 @@ index 0f2056c..872aff7 100644
 +++ b/resources/views/admin/settings/advanced.blade.php
 @@ -6,7 +6,7 @@
  @endsection
- 
+
  @section('content-header')
 -    <h1>Advanced Settings<small>Configure advanced settings for Pterodactyl.</small></h1>
 +    <h1>Advanced Settings<small>Configure advanced settings for DiamondCrew Server Manager.</small></h1>
@@ -411,7 +942,7 @@ index 489646d..0c175b5 100644
 +++ b/resources/views/admin/settings/index.blade.php
 @@ -6,7 +6,7 @@
  @endsection
- 
+
  @section('content-header')
 -    <h1>Panel Settings<small>Configure Pterodactyl to your liking.</small></h1>
 +    <h1>Panel Settings<small>Configure DiamondCrew Server Manager to your liking.</small></h1>
@@ -424,7 +955,7 @@ index 9e99acd..9834d0b 100644
 +++ b/resources/views/admin/settings/mail.blade.php
 @@ -6,7 +6,7 @@
  @endsection
- 
+
  @section('content-header')
 -    <h1>Mail Settings<small>Configure how Pterodactyl should handle sending emails.</small></h1>
 +    <h1>Mail Settings<small>Configure how DiamondCrew Server Manager should handle sending emails.</small></h1>
@@ -432,7 +963,7 @@ index 9e99acd..9834d0b 100644
          <li><a href="{{ route('admin.index') }}">Admin</a></li>
          <li class="active">Settings</li>
 diff --git a/resources/views/layouts/admin.blade.php b/resources/views/layouts/admin.blade.php
-index 20ca084..20e9224 100644
+index 20ca084..886ef47 100644
 --- a/resources/views/layouts/admin.blade.php
 +++ b/resources/views/layouts/admin.blade.php
 @@ -3,18 +3,11 @@
@@ -443,7 +974,7 @@ index 20ca084..20e9224 100644
 +        <title>DiamondCrew Server Manager - @yield('title')</title>
          <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
          <meta name="_token" content="{{ csrf_token() }}">
- 
+
 -        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
 -        <link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
 -        <link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
@@ -453,9 +984,9 @@ index 20ca084..20e9224 100644
 -        <meta name="msapplication-config" content="/favicons/browserconfig.xml">
 -        <meta name="theme-color" content="#0e4688">
 +        @include('partials.diamondcrew.head')
- 
+
          @include('layouts.scripts')
- 
+
 @@ -34,12 +27,13 @@
              <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
              <![endif]-->
@@ -472,7 +1003,27 @@ index 20ca084..20e9224 100644
                  </a>
                  <nav class="navbar navbar-static-top">
                      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-@@ -159,7 +153,7 @@
+@@ -64,6 +58,7 @@
+                             </li>
+                         </ul>
+                     </div>
++                    <div class="dc-admin-header-art" aria-hidden="true">PLAY<br>CREATE<br>TOGETHER</div>
+                 </nav>
+             </header>
+             <aside class="main-sidebar">
+@@ -123,6 +118,11 @@
+                             </a>
+                         </li>
+                     </ul>
++                    <div class="dc-admin-sidebar-brand" aria-hidden="true">
++                        <img src="/branding/diamondcrew/diamond-circle-logo.png" width="74" height="74" alt="">
++                        <span class="dc-gradient-text">DiamondCrew<br>Interactive</span>
++                        <small>GAME SERVERS<br>WITHOUT LIMITS</small>
++                    </div>
+                 </section>
+             </aside>
+             <div class="content-wrapper">
+@@ -159,7 +159,7 @@
                      <strong><i class="fa fa-fw {{ $appIsGit ? 'fa-git-square' : 'fa-code-fork' }}"></i></strong> {{ $appVersion }}<br />
                      <strong><i class="fa fa-fw fa-clock-o"></i></strong> {{ round(microtime(true) - LARAVEL_START, 3) }}s
                  </div>
@@ -491,7 +1042,7 @@ index a2d218a..1c0926f 100644
      <head>
 -        <title>{{ config('app.name', 'Pterodactyl') }}</title>
 +        <title>DiamondCrew Server Manager</title>
- 
+
          @section('meta')
              <meta charset="utf-8">
 @@ -9,14 +9,8 @@
@@ -509,10 +1060,10 @@ index a2d218a..1c0926f 100644
 +        @include('partials.diamondcrew.head')
 +            <link rel="stylesheet" href="/branding/diamondcrew/client.css?v={{ filemtime(public_path('branding/diamondcrew/client.css')) }}">
          @show
- 
+
          @section('user-data')
 @@ -36,7 +30,7 @@
- 
+
          @include('layouts.scripts')
      </head>
 -    <body class="{{ $css['body'] ?? 'bg-neutral-50' }}">
@@ -527,7 +1078,7 @@ index 7c814bd..4f7defe 100644
 @@ -1,4 +1,5 @@
  const colors = require('tailwindcss/colors');
 +const diamondcrew = require('./resources/diamondcrew/tokens.json');
- 
+
  const gray = {
      50: 'hsl(216, 33%, 97%)',
 @@ -23,12 +24,14 @@ module.exports = {

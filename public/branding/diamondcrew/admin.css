@@ -1,6 +1,35 @@
 /* AdminLTE compatibility layer; keep upstream layout, plugins and state classes. */
+.dc-admin-header-art { display: none; }
+.dc-admin .main-sidebar { background-image: url('/branding/diamondcrew/sidebar-shards.svg'); background-repeat: no-repeat; background-position: left bottom; background-size: 252px auto; }
+.dc-admin-sidebar-brand { display: flex; flex-direction: column; align-items: center; padding: 30px 16px; gap: 12px; text-align: center; }
+.dc-admin-sidebar-brand > span { font-size: 24px; line-height: 1; font-weight: 800; }
+.dc-admin-sidebar-brand small { font-size: 10px; letter-spacing: 3px; color: var(--dc-muted); }
+.dc-admin.sidebar-collapse .dc-admin-sidebar-brand { display: none; }
+@media (min-width: 768px) {
+    .dc-admin.fixed .main-header { height: var(--dc-header-height); }
+    .dc-admin.fixed .main-header .logo { height: var(--dc-header-height); line-height: var(--dc-header-height); width: 350px; }
+    .dc-admin.fixed .main-header .logo .dc-brand img { width: 80px; height: 80px; }
+    .dc-admin.fixed .main-header .logo .dc-brand__name { font-size: 30px; }
+    .dc-admin.fixed .main-header .logo .dc-brand__subtitle { font-size: 18px; }
+    .dc-admin.fixed .main-header .navbar { margin-left: 350px; height: var(--dc-header-height); }
+    .dc-admin.fixed .main-header .navbar .sidebar-toggle, .dc-admin.fixed .main-header .navbar .nav > li > a { padding-top: 40px; padding-bottom: 40px; }
+    .dc-admin.fixed .main-sidebar { padding-top: var(--dc-header-height); }
+    .dc-admin.fixed .content-wrapper { padding-top: var(--dc-header-height); }
+    .dc-admin:not(.sidebar-collapse) .main-sidebar { width: var(--dc-sidebar-width); }
+    .dc-admin:not(.sidebar-collapse) .content-wrapper, .dc-admin:not(.sidebar-collapse) .main-footer { margin-left: var(--dc-sidebar-width); }
+    .dc-admin .sidebar-menu > li > a { padding: 14px 20px 14px 28px; font-size: 15px; }
+    .dc-admin .sidebar-menu > li > a > .fa { width: 30px; font-size: 20px; margin-right: 8px; }
+    .dc-admin.sidebar-collapse .main-header .logo { width: 50px; padding: 0; }
+    .dc-admin.sidebar-collapse .main-header .logo .dc-brand img { width: 42px; height: 42px; }
+    .dc-admin.sidebar-collapse .main-header .logo .dc-brand__copy { display: none; }
+    .dc-admin.sidebar-collapse .main-header .navbar { margin-left: 50px; }
+}
+@media (min-width: 1200px) {
+    .dc-admin-header-art { display: block; position: absolute; right: 0; top: 0; height: 101px; width: 360px; background: url('/branding/diamondcrew/header-shards.svg') center / cover; color: var(--dc-muted); font-size: 17px; letter-spacing: 4px; line-height: 1.3; text-align: right; padding: 20px 24px; pointer-events: none; }
+    .dc-admin .navbar-custom-menu { margin-right: 370px; }
+}
 body.dc-admin { color-scheme: dark; color: var(--dc-text); background: var(--dc-background); font-family: 'Segoe UI', system-ui, sans-serif; }
-.dc-admin .wrapper, .dc-admin .content-wrapper, .dc-admin .main-sidebar, .dc-admin .left-side { background: var(--dc-background); }
+.dc-admin .wrapper, .dc-admin .content-wrapper, .dc-admin .main-sidebar, .dc-admin .left-side { background-color: var(--dc-background); }
 .dc-admin .content-wrapper { border-left: 1px solid var(--dc-border); }
 .dc-admin .content { padding: 24px; }
 .dc-admin .content-header { padding: 24px 24px 0; }
