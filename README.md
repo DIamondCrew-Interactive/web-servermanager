@@ -1,3 +1,28 @@
+# DiamondCrew Server Manager
+
+DiamondCrew reskin of the original Pterodactyl Panel **1.15.1**. The existing
+frontend, backend, API and permission system are preserved.
+
+The target repository is [DIamondCrew-Interactive/web-servermanager](https://github.com/DIamondCrew-Interactive/web-servermanager).
+`web-servermanager` is a technical repository name. The user-facing product name
+is **DiamondCrew Server Manager**.
+
+- [Reskin architecture, build, deployment and rollback](docs/diamondcrew-reskin.md)
+- [Changed frontend files](docs/diamondcrew-files.json)
+- [Brand assets](public/branding/diamondcrew/README.md)
+
+Use Node 22+ and Yarn Classic 1.22.22, install with `yarn install --frozen-lockfile`,
+then run `npm run tsc`, `npm run lint` and `npm run build:production`.
+Build outputs are generated locally; dependencies, deployment backups, runtime
+data and live environment configuration are excluded from Git.
+
+This repository contains source code. Pushing it does not deploy the panel.
+Follow the documented deployment procedure for an existing compatible installation.
+
+## Upstream project
+
+The original Pterodactyl documentation and attribution are retained below.
+
 [![Logo Image](https://cdn.pterodactyl.io/logos/new/pterodactyl_logo.png)](https://pterodactyl.io)
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/pterodactyl/panel/ci.yaml?label=Tests&style=for-the-badge&branch=1.0-develop)

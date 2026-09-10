@@ -1,0 +1,16 @@
+{
+    "name": "DiamondCrew Server Manager",
+    "short_name": "DiamondCrew",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#080e15",
+    "theme_color": "#080e15",
+    "icons": [
+        {
+            "src": "/branding/diamondcrew/diamond-circle-logo.png",
+            "sizes": "768x768",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

@@ -1,0 +1,99 @@
+/* AdminLTE compatibility layer; keep upstream layout, plugins and state classes. */
+body.dc-admin { color-scheme: dark; color: var(--dc-text); background: var(--dc-background); font-family: 'Segoe UI', system-ui, sans-serif; }
+.dc-admin .wrapper, .dc-admin .content-wrapper, .dc-admin .main-sidebar, .dc-admin .left-side { background: var(--dc-background); }
+.dc-admin .content-wrapper { border-left: 1px solid var(--dc-border); }
+.dc-admin .content { padding: 24px; }
+.dc-admin .content-header { padding: 24px 24px 0; }
+.dc-admin .content-header h1 { font-weight: 650; }
+.dc-admin .content-header h1 small { color: var(--dc-muted); }
+.dc-admin .main-header .logo, .dc-admin .main-header .navbar { background: var(--dc-background); border-bottom: 1px solid var(--dc-border); }
+.dc-admin .main-header .logo { padding: 0 12px; }
+.dc-admin .main-header .logo .dc-brand { gap: 8px; }
+.dc-admin .main-header .logo .dc-brand img { width: 40px; height: 40px; }
+.dc-admin .main-header .logo .dc-brand__name { font-size: 23px; }
+.dc-admin .main-header .logo .dc-brand__subtitle { font-size: 11px; }
+.dc-admin .main-header .navbar .nav > li > a, .dc-admin .main-header .navbar .sidebar-toggle { color: var(--dc-muted); }
+.dc-admin .main-header .navbar .nav > li > a:hover, .dc-admin .main-header .navbar .sidebar-toggle:hover { color: var(--dc-primary); background: var(--dc-raised); }
+.dc-admin .sidebar-menu > li.header { background: transparent; color: var(--dc-muted); letter-spacing: .12em; font-size: 10px; padding-top: 24px; }
+.dc-admin .sidebar-menu > li > a { color: var(--dc-muted); margin: 4px 8px; border-radius: 7px; padding: 13px 12px; }
+.dc-admin .sidebar-menu > li:hover > a, .dc-admin .sidebar-menu > li.active > a { color: var(--dc-secondary); border-left-color: var(--dc-secondary); background: linear-gradient(100deg, #ef45b51c, #20a9f509); }
+.dc-admin .sidebar-menu .treeview-menu { background: var(--dc-surface); }
+.dc-admin .sidebar-menu .treeview-menu a { color: var(--dc-muted); }
+.dc-admin .main-sidebar { background-image: linear-gradient(130deg, transparent 80%, #20a9f509 80.1%, transparent 95%); }
+.dc-admin a { color: var(--dc-primary); }
+.dc-admin a:hover { color: var(--dc-secondary); }
+.dc-admin .box, .dc-admin .info-box, .dc-admin .small-box, .dc-admin .panel, .dc-admin .well { color: var(--dc-text); background: var(--dc-surface); border: 1px solid var(--dc-border); border-radius: 9px; box-shadow: 0 8px 28px #0002; }
+.dc-admin .box-header, .dc-admin .box-footer, .dc-admin .panel-heading, .dc-admin .panel-footer { color: var(--dc-text); background: transparent; border-color: var(--dc-border); }
+.dc-admin .box-header { padding: 16px; }
+.dc-admin .box-header .box-title { font-weight: 600; }
+.dc-admin .box-body { padding: 16px; }
+.dc-admin .box-body.no-padding { padding: 0; }
+.dc-admin .box-primary, .dc-admin .box-info { border-top: 2px solid var(--dc-primary); }
+.dc-admin .box-success { border-top: 2px solid var(--dc-success); }
+.dc-admin .box-danger { border-top: 2px solid var(--dc-error); }
+.dc-admin .box-warning { border-top: 2px solid var(--dc-warning); }
+.dc-admin .table { color: var(--dc-text); }
+.dc-admin .table > :is(thead, tbody, tfoot) > tr > :is(td, th), .dc-admin .table-bordered { border-color: var(--dc-border); }
+.dc-admin .table > thead > tr > th { color: var(--dc-muted); background: var(--dc-background); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding-top: 14px; padding-bottom: 14px; }
+.dc-admin .table-striped > tbody > tr:nth-of-type(odd) { background: var(--dc-background); }
+.dc-admin .table-hover > tbody > tr:hover { background: var(--dc-raised); }
+.dc-admin .table > tbody > tr.active > td, .dc-admin .table > tbody > tr > td.active { background: var(--dc-raised); }
+.dc-admin .table > tbody > tr.danger > td, .dc-admin .table > tbody > tr > td.danger { background: #ff727d19; }
+.dc-admin .table > tbody > tr.warning > td, .dc-admin .table > tbody > tr > td.warning { background: #f4c66b19; }
+.dc-admin .table > tbody > tr.success > td, .dc-admin .table > tbody > tr > td.success { background: #42d39219; }
+.dc-admin .table > tbody > tr.info > td, .dc-admin .table > tbody > tr > td.info { background: #20a9f519; }
+.dc-admin .form-control, .dc-admin .input-group-addon, .dc-admin .select2-container--default .select2-selection--single, .dc-admin .select2-container--default .select2-selection--multiple, .dc-admin .select2-dropdown, .dc-admin .select2-search__field {
+    background: var(--dc-background); color: var(--dc-text); border: 1px solid var(--dc-border); border-radius: 5px;
+}
+.dc-admin .form-control:focus, .dc-admin .select2-container--focus .select2-selection { border-color: var(--dc-primary); box-shadow: 0 0 0 2px #20a9f520; }
+.dc-admin .form-control[disabled], .dc-admin .form-control[readonly] { background: var(--dc-raised); color: var(--dc-muted); }
+.dc-admin .select2-container--default .select2-selection__rendered { color: var(--dc-text); }
+.dc-admin .select2-container--default .select2-selection__choice { background: var(--dc-raised); color: var(--dc-text); border-color: var(--dc-border); }
+.dc-admin .select2-container--default .select2-results__option[aria-selected=true] { background: var(--dc-raised); }
+.dc-admin .select2-container--default .select2-results__option--highlighted[aria-selected] { background: var(--dc-border); color: var(--dc-text); }
+.dc-admin .has-error .form-control { border-color: var(--dc-error); }
+.dc-admin .has-error :is(.help-block, .control-label) { color: var(--dc-error); }
+.dc-admin .help-block, .dc-admin .text-muted, .dc-admin .text-gray, .dc-admin .breadcrumb > .active { color: var(--dc-muted) !important; }
+.dc-admin .btn { border-radius: 5px; transition: background-color .15s, border-color .15s; }
+.dc-admin .btn-default { background: var(--dc-raised); color: var(--dc-text); border-color: var(--dc-border); }
+.dc-admin .btn-primary, .dc-admin .btn-info { background: #06699f; color: var(--dc-text); border-color: var(--dc-primary); }
+.dc-admin .btn-success { background: #126440; color: var(--dc-text); border-color: var(--dc-success); }
+.dc-admin .btn-danger { background: #982f40; color: var(--dc-text); border-color: var(--dc-error); }
+.dc-admin .btn-warning { background: var(--dc-accent); color: var(--dc-background); border-color: var(--dc-warning); }
+.dc-admin .btn:hover { filter: brightness(1.15); }
+.dc-admin .btn:disabled, .dc-admin .btn.disabled { filter: none; opacity: .5; }
+.dc-admin .nav-tabs-custom, .dc-admin .nav-tabs-custom > .tab-content { background: var(--dc-surface); color: var(--dc-text); border-radius: 8px; }
+.dc-admin .nav-tabs, .dc-admin .nav-tabs-custom > .nav-tabs { border-bottom-color: var(--dc-border); }
+.dc-admin .nav-tabs > li > a { color: var(--dc-muted); }
+.dc-admin .nav-tabs > li.active, .dc-admin .nav-tabs-custom > .nav-tabs > li.active { border-top-color: var(--dc-secondary); }
+.dc-admin .nav-tabs > li.active > a, .dc-admin .nav-tabs > li > a:hover, .dc-admin .nav-tabs > li.active > a:focus, .dc-admin .nav-tabs-custom > .nav-tabs > li.active > a { background: var(--dc-raised); color: var(--dc-secondary); border-color: var(--dc-border); }
+.dc-admin .pagination > li > :is(a, span) { background: var(--dc-surface); color: var(--dc-muted); border-color: var(--dc-border); }
+.dc-admin .pagination > .active > :is(a, span) { background: var(--dc-raised); color: var(--dc-primary); border-color: var(--dc-primary); }
+.dc-admin .pagination > .disabled > :is(a, span) { background: var(--dc-background); color: var(--dc-muted); opacity: .5; }
+.dc-admin .modal-content, .dc-admin .sweet-alert, .dc-admin .dropdown-menu, .dc-admin .popover { background: var(--dc-surface); color: var(--dc-text); border: 1px solid var(--dc-border); border-radius: 9px; }
+.dc-admin .modal-header, .dc-admin .modal-footer { border-color: var(--dc-border); }
+.dc-admin .sweet-alert h2, .dc-admin .sweet-alert p { color: var(--dc-text); }
+.dc-admin .sweet-alert input { background: var(--dc-background); color: var(--dc-text); border-color: var(--dc-border); }
+.dc-admin .sweet-alert .sa-icon.sa-success::before, .dc-admin .sweet-alert .sa-icon.sa-success::after, .dc-admin .sweet-alert .sa-icon.sa-success .sa-fix { background: var(--dc-surface); }
+.dc-admin .dropdown-menu > li > a { color: var(--dc-text); }
+.dc-admin .dropdown-menu > li > a:hover { background: var(--dc-raised); }
+.dc-admin .close { color: var(--dc-text); text-shadow: none; opacity: .8; }
+.dc-admin .alert { border-radius: 6px; }
+.dc-admin .alert-success { background: #123b2c !important; border-color: var(--dc-success); color: #c2f7df !important; }
+.dc-admin .alert-danger { background: #461e29 !important; border-color: var(--dc-error); color: #ffd5db !important; }
+.dc-admin .alert-warning { background: #44371e !important; border-color: var(--dc-warning); color: #ffebbb !important; }
+.dc-admin .alert-info { background: #12354d !important; border-color: var(--dc-primary); color: #d9f2ff !important; }
+.dc-admin .alert a { color: inherit; text-decoration: underline; }
+.dc-admin pre, .dc-admin code { background: var(--dc-background); color: var(--dc-accent); border-color: var(--dc-border); }
+.dc-admin hr, .dc-admin .list-group-item { border-color: var(--dc-border); }
+.dc-admin .list-group-item, .dc-admin .progress { background: var(--dc-raised); }
+.dc-admin .main-footer { background: var(--dc-background); color: var(--dc-muted); border-top: 1px solid var(--dc-border); }
+.dc-admin .content-header .breadcrumb { background: transparent; }
+.dc-admin .label-default, .dc-admin .bg-gray { background: var(--dc-raised) !important; color: var(--dc-text) !important; }
+.dc-admin tr:hover + tr.server-description { background: var(--dc-raised) !important; }
+.dc-admin .callout.callout-slim { color: var(--dc-muted) !important; }
+.dc-admin .callout.callout-slim a { color: var(--dc-primary) !important; }
+.dc-admin .callout.callout-default.callout-slim { border-color: var(--dc-border) !important; }
+.dc-admin :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--dc-primary); outline-offset: 3px; }
+@media (min-width: 768px) { .dc-admin.sidebar-collapse .main-header .logo .dc-brand__copy { display: none; } .dc-admin.sidebar-collapse .main-header .logo { padding: 0 5px; } }
+@media (max-width: 767px) { .dc-admin .content { padding: 14px; } .dc-admin .content-header { padding: 16px 14px 0; } .dc-admin .box-body { overflow-x: auto; } .dc-admin .content-header .breadcrumb { position: static; } }

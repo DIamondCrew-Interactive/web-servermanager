@@ -1,0 +1,551 @@
+diff --git a/package.json b/package.json
+index 732015e..5d92857 100644
+--- a/package.json
++++ b/package.json
+@@ -130,13 +130,16 @@
+         "webpack-dev-server": "^5.2.2"
+     },
+     "scripts": {
++        "theme:diamondcrew": "node scripts/diamondcrew-theme.cjs",
++        "prebuild": "node scripts/diamondcrew-theme.cjs",
++        "prewatch": "node scripts/diamondcrew-theme.cjs",
+         "clean": "cd public/assets && find . \\( -name \"*.js\" -o -name \"*.map\" \\) -type f -delete",
+         "test": "jest",
+         "tsc": "tsc --noEmit",
+         "lint": "eslint ./resources/scripts/**/*.{ts,tsx} --ext .ts,.tsx",
+         "watch": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --watch --progress",
+         "build": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --progress",
+-        "build:production": "yarn run clean && cross-env NODE_ENV=production ./node_modules/.bin/webpack --mode production",
++        "build:production": "node scripts/diamondcrew-theme.cjs && cross-env NODE_ENV=production webpack --mode production",
+         "serve": "yarn run clean && cross-env NODE_ENV=development USE_LOCAL_CERTS=true WEBPACK_PUBLIC_PATH=https://pterodactyl.test:5173/ webpack serve --progress --hot --server-type https"
+     },
+     "browserslist": [
+diff --git a/resources/lang/en/strings.php b/resources/lang/en/strings.php
+index ddade2c..b17ec36 100644
+--- a/resources/lang/en/strings.php
++++ b/resources/lang/en/strings.php
+@@ -91,5 +91,5 @@ return [
+     'enable' => 'Enable',
+     'disable' => 'Disable',
+     'save' => 'Save',
+-    'copyright' => '&copy; 2015 - :year Pterodactyl Software',
++    'copyright' => '&copy; :year DiamondCrew Server Manager',
+ ];
+diff --git a/resources/scripts/components/NavigationBar.tsx b/resources/scripts/components/NavigationBar.tsx
+index 6142f62..8c0ef6c 100644
+--- a/resources/scripts/components/NavigationBar.tsx
++++ b/resources/scripts/components/NavigationBar.tsx
+@@ -12,6 +12,7 @@ import http from '@/api/http';
+ import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
+ import Tooltip from '@/components/elements/tooltip/Tooltip';
+ import Avatar from '@/components/Avatar';
++import Brand from '@/components/branding/Brand';
+ 
+ const RightNavigation = styled.div`
+     & > a,
+@@ -33,7 +34,6 @@ const RightNavigation = styled.div`
+ `;
+ 
+ export default () => {
+-    const name = useStoreState((state: ApplicationStore) => state.settings.data!.name);
+     const rootAdmin = useStoreState((state: ApplicationStore) => state.user.data!.rootAdmin);
+     const [isLoggingOut, setIsLoggingOut] = useState(false);
+ 
+@@ -46,7 +46,7 @@ export default () => {
+     };
+ 
+     return (
+-        <div className={'w-full bg-neutral-900 shadow-md overflow-x-auto'}>
++        <div className={'dc-header w-full bg-neutral-900 shadow-md overflow-x-auto'}>
+             <SpinnerOverlay visible={isLoggingOut} />
+             <div className={'mx-auto w-full flex items-center h-[3.5rem] max-w-[1200px]'}>
+                 <div id={'logo'} className={'flex-1'}>
+@@ -56,7 +56,7 @@ export default () => {
+                             'text-2xl font-header font-medium px-4 no-underline text-neutral-200 hover:text-neutral-100 transition-colors duration-150'
+                         }
+                     >
+-                        {name}
++                        <Brand />
+                     </Link>
+                 </div>
+                 <RightNavigation className={'flex h-full items-center justify-center'}>
+diff --git a/resources/scripts/components/auth/LoginFormContainer.tsx b/resources/scripts/components/auth/LoginFormContainer.tsx
+index 6274981..af57469 100644
+--- a/resources/scripts/components/auth/LoginFormContainer.tsx
++++ b/resources/scripts/components/auth/LoginFormContainer.tsx
+@@ -1,55 +1,25 @@
+ import React, { forwardRef } from 'react';
+ import { Form } from 'formik';
+-import styled from 'styled-components/macro';
+-import { breakpoint } from '@/theme';
+ import FlashMessageRender from '@/components/FlashMessageRender';
++import Brand from '@/components/branding/Brand';
+ import tw from 'twin.macro';
+ 
+ type Props = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> & {
+     title?: string;
+ };
+ 
+-const Container = styled.div`
+-    ${breakpoint('sm')`
+-        ${tw`w-4/5 mx-auto`}
+-    `};
+-
+-    ${breakpoint('md')`
+-        ${tw`p-10`}
+-    `};
+-
+-    ${breakpoint('lg')`
+-        ${tw`w-3/5`}
+-    `};
+-
+-    ${breakpoint('xl')`
+-        ${tw`w-full`}
+-        max-width: 700px;
+-    `};
+-`;
+-
+ export default forwardRef<HTMLFormElement, Props>(({ title, ...props }, ref) => (
+-    <Container>
+-        {title && <h2 css={tw`text-3xl text-center text-neutral-100 font-medium py-4`}>{title}</h2>}
++    <div className={'dc-auth'}>
++        <div className={'dc-auth__brand'}>
++            <Brand large />
++        </div>
++        {title && <h2 css={tw`text-center text-neutral-100 font-medium py-4`}>{title}</h2>}
+         <FlashMessageRender css={tw`mb-2 px-1`} />
+         <Form {...props} ref={ref}>
+-            <div css={tw`md:flex w-full bg-white shadow-lg rounded-lg p-6 md:pl-0 mx-1`}>
+-                <div css={tw`flex-none select-none mb-6 md:mb-0 self-center`}>
+-                    <img src={'/assets/svgs/pterodactyl.svg'} css={tw`block w-48 md:w-64 mx-auto`} />
+-                </div>
+-                <div css={tw`flex-1`}>{props.children}</div>
+-            </div>
++            <div className={'dc-auth__form'}>{props.children}</div>
+         </Form>
+-        <p css={tw`text-center text-neutral-500 text-xs mt-4`}>
+-            &copy; 2015 - {new Date().getFullYear()}&nbsp;
+-            <a
+-                rel={'noopener nofollow noreferrer'}
+-                href={'https://pterodactyl.io'}
+-                target={'_blank'}
+-                css={tw`no-underline text-neutral-500 hover:text-neutral-300`}
+-            >
+-                Pterodactyl Software
+-            </a>
++        <p css={tw`text-center text-neutral-300 text-xs mt-6`}>
++            &copy; {new Date().getFullYear()} DiamondCrew Interactive
+         </p>
+-    </Container>
++    </div>
+ ));
+diff --git a/resources/scripts/components/dashboard/DashboardContainer.tsx b/resources/scripts/components/dashboard/DashboardContainer.tsx
+index 23ad2e3..079b4f6 100644
+--- a/resources/scripts/components/dashboard/DashboardContainer.tsx
++++ b/resources/scripts/components/dashboard/DashboardContainer.tsx
+@@ -54,6 +54,10 @@ export default () => {
+ 
+     return (
+         <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
++            <div css={tw`mb-8`}>
++                <h1 css={tw`text-3xl text-neutral-50 mb-2`}>Dashboard</h1>
++                <p css={tw`text-neutral-300`}>Manage your servers with DiamondCrew Server Manager.</p>
++            </div>
+             {rootAdmin && (
+                 <div css={tw`mb-2 flex justify-end items-center`}>
+                     <p css={tw`uppercase text-xs text-neutral-400 mr-2`}>
+diff --git a/resources/scripts/components/elements/DropdownMenu.tsx b/resources/scripts/components/elements/DropdownMenu.tsx
+index 0c5361a..6ab3e3c 100644
+--- a/resources/scripts/components/elements/DropdownMenu.tsx
++++ b/resources/scripts/components/elements/DropdownMenu.tsx
+@@ -9,11 +9,11 @@ interface Props {
+ }
+ 
+ export const DropdownButtonRow = styled.button<{ danger?: boolean }>`
+-    ${tw`p-2 flex items-center rounded w-full text-neutral-500`};
++    ${tw`p-2 flex items-center rounded w-full text-neutral-200`};
+     transition: 150ms all ease;
+ 
+     &:hover {
+-        ${(props) => (props.danger ? tw`text-red-700 bg-red-100` : tw`text-neutral-700 bg-neutral-100`)};
++        ${(props) => (props.danger ? tw`text-red-200 bg-red-900` : tw`text-neutral-100 bg-neutral-700`)};
+     }
+ `;
+ 
+@@ -94,7 +94,7 @@ class DropdownMenu extends React.PureComponent<Props, State> {
+                             this.setState({ visible: false });
+                         }}
+                         style={{ width: '12rem' }}
+-                        css={tw`absolute bg-white p-2 rounded border border-neutral-700 shadow-lg text-neutral-500 z-50`}
++                        css={tw`absolute bg-neutral-900 p-2 rounded-lg border border-neutral-600 shadow-lg text-neutral-200 z-50`}
+                     >
+                         {this.props.children}
+                     </div>
+diff --git a/resources/scripts/components/elements/GreyRowBox.tsx b/resources/scripts/components/elements/GreyRowBox.tsx
+index e5a7f96..e18daf0 100644
+--- a/resources/scripts/components/elements/GreyRowBox.tsx
++++ b/resources/scripts/components/elements/GreyRowBox.tsx
+@@ -2,11 +2,11 @@ import styled from 'styled-components/macro';
+ import tw from 'twin.macro';
+ 
+ export default styled.div<{ $hoverable?: boolean }>`
+-    ${tw`flex rounded no-underline text-neutral-200 items-center bg-neutral-700 p-4 border border-transparent transition-colors duration-150 overflow-hidden`};
++    ${tw`flex rounded-lg no-underline text-neutral-200 items-center bg-neutral-800 p-4 border border-neutral-600 transition-colors duration-150 overflow-hidden`};
+ 
+     ${(props) => props.$hoverable !== false && tw`hover:border-neutral-500`};
+ 
+     & .icon {
+-        ${tw`rounded-full w-16 flex items-center justify-center bg-neutral-500 p-3`};
++        ${tw`rounded-lg w-16 flex items-center justify-center bg-neutral-900 text-primary-400 p-3`};
+     }
+ `;
+diff --git a/resources/scripts/components/elements/Input.tsx b/resources/scripts/components/elements/Input.tsx
+index 677a501..ef2d63d 100644
+--- a/resources/scripts/components/elements/Input.tsx
++++ b/resources/scripts/components/elements/Input.tsx
+@@ -7,13 +7,13 @@ export interface Props {
+ }
+ 
+ const light = css<Props>`
+-    ${tw`bg-white border-neutral-200 text-neutral-800`};
++    ${tw`bg-neutral-900 border-neutral-600 text-neutral-100`};
+     &:focus {
+         ${tw`border-primary-400`}
+     }
+ 
+     &:disabled {
+-        ${tw`bg-neutral-100 border-neutral-200`};
++        ${tw`bg-neutral-800 border-neutral-600`};
+     }
+ `;
+ 
+diff --git a/resources/scripts/components/elements/Label.tsx b/resources/scripts/components/elements/Label.tsx
+index 704e832..8da77cd 100644
+--- a/resources/scripts/components/elements/Label.tsx
++++ b/resources/scripts/components/elements/Label.tsx
+@@ -3,7 +3,7 @@ import tw from 'twin.macro';
+ 
+ const Label = styled.label<{ isLight?: boolean }>`
+     ${tw`block text-xs uppercase text-neutral-200 mb-1 sm:mb-2`};
+-    ${(props) => props.isLight && tw`text-neutral-700`};
++    ${(props) => props.isLight && tw`text-neutral-200`};
+ `;
+ 
+ export default Label;
+diff --git a/resources/scripts/components/elements/PageContentBlock.tsx b/resources/scripts/components/elements/PageContentBlock.tsx
+index a4df195..53d7dfd 100644
+--- a/resources/scripts/components/elements/PageContentBlock.tsx
++++ b/resources/scripts/components/elements/PageContentBlock.tsx
+@@ -3,6 +3,7 @@ import ContentContainer from '@/components/elements/ContentContainer';
+ import { CSSTransition } from 'react-transition-group';
+ import tw from 'twin.macro';
+ import FlashMessageRender from '@/components/FlashMessageRender';
++import { BRAND_NAME } from '@/components/branding/Brand';
+ 
+ export interface PageContentBlockProps {
+     title?: string;
+@@ -12,9 +13,7 @@ export interface PageContentBlockProps {
+ 
+ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey, className, children }) => {
+     useEffect(() => {
+-        if (title) {
+-            document.title = title;
+-        }
++        document.title = title ? `${title} | ${BRAND_NAME}` : BRAND_NAME;
+     }, [title]);
+ 
+     return (
+@@ -25,16 +24,8 @@ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey
+                     {children}
+                 </ContentContainer>
+                 <ContentContainer css={tw`mb-4`}>
+-                    <p css={tw`text-center text-neutral-500 text-xs`}>
+-                        <a
+-                            rel={'noopener nofollow noreferrer'}
+-                            href={'https://pterodactyl.io'}
+-                            target={'_blank'}
+-                            css={tw`no-underline text-neutral-500 hover:text-neutral-300`}
+-                        >
+-                            Pterodactyl&reg;
+-                        </a>
+-                        &nbsp;&copy; 2015 - {new Date().getFullYear()}
++                    <p className={'dc-footer'}>
++                        {BRAND_NAME} &middot; &copy; {new Date().getFullYear()} DiamondCrew Interactive
+                     </p>
+                 </ContentContainer>
+             </>
+diff --git a/resources/scripts/components/elements/ScreenBlock.tsx b/resources/scripts/components/elements/ScreenBlock.tsx
+index 0b57e92..5f79485 100644
+--- a/resources/scripts/components/elements/ScreenBlock.tsx
++++ b/resources/scripts/components/elements/ScreenBlock.tsx
+@@ -44,7 +44,7 @@ const ScreenBlock = ({ title, image, message, onBack, onRetry }: ScreenBlockProp
+     <PageContentBlock>
+         <div css={tw`flex justify-center`}>
+             <div
+-                css={tw`w-full sm:w-3/4 md:w-1/2 p-12 md:p-20 bg-neutral-100 rounded-lg shadow-lg text-center relative`}
++                css={tw`w-full sm:w-3/4 md:w-1/2 p-12 md:p-20 bg-neutral-800 border border-neutral-600 rounded-lg shadow-lg text-center relative`}
+             >
+                 {(typeof onBack === 'function' || typeof onRetry === 'function') && (
+                     <div css={tw`absolute left-0 top-0 ml-4 mt-4`}>
+@@ -57,8 +57,8 @@ const ScreenBlock = ({ title, image, message, onBack, onRetry }: ScreenBlockProp
+                     </div>
+                 )}
+                 <img src={image} css={tw`w-2/3 h-auto select-none mx-auto`} />
+-                <h2 css={tw`mt-10 text-neutral-900 font-bold text-4xl`}>{title}</h2>
+-                <p css={tw`text-sm text-neutral-700 mt-2`}>{message}</p>
++                <h2 css={tw`mt-10 text-neutral-100 font-bold text-4xl`}>{title}</h2>
++                <p css={tw`text-sm text-neutral-300 mt-2`}>{message}</p>
+             </div>
+         </div>
+     </PageContentBlock>
+diff --git a/resources/scripts/components/elements/SubNavigation.tsx b/resources/scripts/components/elements/SubNavigation.tsx
+index 9a25b80..164bb62 100644
+--- a/resources/scripts/components/elements/SubNavigation.tsx
++++ b/resources/scripts/components/elements/SubNavigation.tsx
+@@ -2,7 +2,7 @@ import styled from 'styled-components/macro';
+ import tw, { theme } from 'twin.macro';
+ 
+ const SubNavigation = styled.div`
+-    ${tw`w-full bg-neutral-700 shadow overflow-x-auto`};
++    ${tw`w-full bg-neutral-900 border-b border-neutral-600 overflow-x-auto`};
+ 
+     & > div {
+         ${tw`flex items-center text-sm mx-auto px-2`};
+@@ -22,8 +22,9 @@ const SubNavigation = styled.div`
+ 
+             &:active,
+             &.active {
+-                ${tw`text-neutral-100`};
+-                box-shadow: inset 0 -2px ${theme`colors.cyan.600`.toString()};
++                ${tw`text-diamondcrew-pink`};
++                background: linear-gradient(100deg, #ef45b514, transparent);
++                box-shadow: inset 0 -2px ${theme`colors.diamondcrew.pink`.toString()};
+             }
+         }
+     }
+diff --git a/resources/scripts/components/elements/TitledGreyBox.tsx b/resources/scripts/components/elements/TitledGreyBox.tsx
+index e135549..24ae598 100644
+--- a/resources/scripts/components/elements/TitledGreyBox.tsx
++++ b/resources/scripts/components/elements/TitledGreyBox.tsx
+@@ -12,8 +12,8 @@ interface Props {
+ }
+ 
+ const TitledGreyBox = ({ icon, title, children, className }: Props) => (
+-    <div css={tw`rounded shadow-md bg-neutral-700`} className={className}>
+-        <div css={tw`bg-neutral-900 rounded-t p-3 border-b border-black`}>
++    <div css={tw`rounded-lg shadow-md bg-neutral-800 border border-neutral-600`} className={className}>
++        <div css={tw`bg-neutral-900 rounded-t-lg p-3 border-b border-neutral-600`}>
+             {typeof title === 'string' ? (
+                 <p css={tw`text-sm uppercase`}>
+                     {icon && <FontAwesomeIcon icon={icon} css={tw`mr-2 text-neutral-300`} />}
+diff --git a/resources/scripts/components/elements/dialog/style.module.css b/resources/scripts/components/elements/dialog/style.module.css
+index 6e78fd4..11d80dc 100644
+--- a/resources/scripts/components/elements/dialog/style.module.css
++++ b/resources/scripts/components/elements/dialog/style.module.css
+@@ -3,7 +3,7 @@
+ }
+ 
+ .panel {
+-    @apply relative bg-gray-600 rounded max-w-xl w-full mx-auto shadow-lg text-left;
++    @apply relative bg-gray-800 border border-gray-600 rounded-lg max-w-xl w-full mx-auto shadow-lg text-left;
+     @apply ring-4 ring-gray-800 ring-opacity-80;
+ }
+ 
+diff --git a/resources/scripts/components/server/console/StatGraphs.tsx b/resources/scripts/components/server/console/StatGraphs.tsx
+index 9af405b..d7aa595 100644
+--- a/resources/scripts/components/server/console/StatGraphs.tsx
++++ b/resources/scripts/components/server/console/StatGraphs.tsx
+@@ -35,8 +35,8 @@ export default () => {
+             return {
+                 ...opts,
+                 label: !index ? 'Network In' : 'Network Out',
+-                borderColor: !index ? theme('colors.cyan.400') : theme('colors.yellow.400'),
+-                backgroundColor: hexToRgba(!index ? theme('colors.cyan.700') : theme('colors.yellow.700'), 0.5),
++                borderColor: !index ? theme('colors.blue.400') : theme('colors.diamondcrew.pink'),
++                backgroundColor: hexToRgba(!index ? theme('colors.blue.700') : theme('colors.diamondcrew.pink'), 0.15),
+             };
+         },
+     });
+diff --git a/resources/views/admin/index.blade.php b/resources/views/admin/index.blade.php
+index 9652532..f0747f1 100644
+--- a/resources/views/admin/index.blade.php
++++ b/resources/views/admin/index.blade.php
+@@ -27,7 +27,7 @@
+             </div>
+             <div class="box-body">
+                 @if ($version->isLatestPanel())
+-                    You are running Pterodactyl Panel version <code>{{ config('app.version') }}</code>. Your panel is up-to-date!
++                    You are running DiamondCrew Server Manager version <code>{{ config('app.version') }}</code>. Your panel is up-to-date!
+                 @else
+                     Your panel is <strong>not up-to-date!</strong> The latest version is <a href="https://github.com/Pterodactyl/Panel/releases/v{{ $version->getPanel() }}" target="_blank"><code>{{ $version->getPanel() }}</code></a> and you are currently running version <code>{{ config('app.version') }}</code>. You can find instructions on how to update your panel <a href="https://pterodactyl.io/panel/1.0/updating.html">here</a>.
+                 @endif
+diff --git a/resources/views/admin/nests/index.blade.php b/resources/views/admin/nests/index.blade.php
+index 4bb6ae7..6b12b2d 100644
+--- a/resources/views/admin/nests/index.blade.php
++++ b/resources/views/admin/nests/index.blade.php
+@@ -16,7 +16,7 @@
+ <div class="row">
+     <div class="col-xs-12">
+         <div class="alert alert-danger">
+-            Eggs are a powerful feature of Pterodactyl Panel that allow for extreme flexibility and configuration. Please note that while powerful, modifying an egg wrongly can very easily brick your servers and cause more problems. Please avoid editing our default eggs — those provided by <code>support@pterodactyl.io</code> — unless you are absolutely sure of what you are doing.
++            Eggs are a powerful feature of DiamondCrew Server Manager that allow for extreme flexibility and configuration. Please note that while powerful, modifying an egg wrongly can very easily brick your servers and cause more problems. Please avoid editing our default eggs — those provided by <code>support@pterodactyl.io</code> — unless you are absolutely sure of what you are doing.
+         </div>
+     </div>
+ </div>
+diff --git a/resources/views/admin/settings/advanced.blade.php b/resources/views/admin/settings/advanced.blade.php
+index 0f2056c..872aff7 100644
+--- a/resources/views/admin/settings/advanced.blade.php
++++ b/resources/views/admin/settings/advanced.blade.php
+@@ -6,7 +6,7 @@
+ @endsection
+ 
+ @section('content-header')
+-    <h1>Advanced Settings<small>Configure advanced settings for Pterodactyl.</small></h1>
++    <h1>Advanced Settings<small>Configure advanced settings for DiamondCrew Server Manager.</small></h1>
+     <ol class="breadcrumb">
+         <li><a href="{{ route('admin.index') }}">Admin</a></li>
+         <li class="active">Settings</li>
+diff --git a/resources/views/admin/settings/index.blade.php b/resources/views/admin/settings/index.blade.php
+index 489646d..0c175b5 100644
+--- a/resources/views/admin/settings/index.blade.php
++++ b/resources/views/admin/settings/index.blade.php
+@@ -6,7 +6,7 @@
+ @endsection
+ 
+ @section('content-header')
+-    <h1>Panel Settings<small>Configure Pterodactyl to your liking.</small></h1>
++    <h1>Panel Settings<small>Configure DiamondCrew Server Manager to your liking.</small></h1>
+     <ol class="breadcrumb">
+         <li><a href="{{ route('admin.index') }}">Admin</a></li>
+         <li class="active">Settings</li>
+diff --git a/resources/views/admin/settings/mail.blade.php b/resources/views/admin/settings/mail.blade.php
+index 9e99acd..9834d0b 100644
+--- a/resources/views/admin/settings/mail.blade.php
++++ b/resources/views/admin/settings/mail.blade.php
+@@ -6,7 +6,7 @@
+ @endsection
+ 
+ @section('content-header')
+-    <h1>Mail Settings<small>Configure how Pterodactyl should handle sending emails.</small></h1>
++    <h1>Mail Settings<small>Configure how DiamondCrew Server Manager should handle sending emails.</small></h1>
+     <ol class="breadcrumb">
+         <li><a href="{{ route('admin.index') }}">Admin</a></li>
+         <li class="active">Settings</li>
+diff --git a/resources/views/layouts/admin.blade.php b/resources/views/layouts/admin.blade.php
+index 20ca084..20e9224 100644
+--- a/resources/views/layouts/admin.blade.php
++++ b/resources/views/layouts/admin.blade.php
+@@ -3,18 +3,11 @@
+     <head>
+         <meta charset="utf-8">
+         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+-        <title>{{ config('app.name', 'Pterodactyl') }} - @yield('title')</title>
++        <title>DiamondCrew Server Manager - @yield('title')</title>
+         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+         <meta name="_token" content="{{ csrf_token() }}">
+ 
+-        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+-        <link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+-        <link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+-        <link rel="manifest" href="/favicons/manifest.json">
+-        <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#bc6e3c">
+-        <link rel="shortcut icon" href="/favicons/favicon.ico">
+-        <meta name="msapplication-config" content="/favicons/browserconfig.xml">
+-        <meta name="theme-color" content="#0e4688">
++        @include('partials.diamondcrew.head')
+ 
+         @include('layouts.scripts')
+ 
+@@ -34,12 +27,13 @@
+             <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+             <![endif]-->
+         @show
++        <link rel="stylesheet" href="/branding/diamondcrew/admin.css?v={{ filemtime(public_path('branding/diamondcrew/admin.css')) }}">
+     </head>
+-    <body class="hold-transition skin-blue fixed sidebar-mini">
++    <body class="dc-admin hold-transition skin-blue fixed sidebar-mini">
+         <div class="wrapper">
+             <header class="main-header">
+                 <a href="{{ route('index') }}" class="logo">
+-                    <span>{{ config('app.name', 'Pterodactyl') }}</span>
++                    @include('partials.diamondcrew.brand')
+                 </a>
+                 <nav class="navbar navbar-static-top">
+                     <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+@@ -159,7 +153,7 @@
+                     <strong><i class="fa fa-fw {{ $appIsGit ? 'fa-git-square' : 'fa-code-fork' }}"></i></strong> {{ $appVersion }}<br />
+                     <strong><i class="fa fa-fw fa-clock-o"></i></strong> {{ round(microtime(true) - LARAVEL_START, 3) }}s
+                 </div>
+-                Copyright &copy; 2015 - {{ date('Y') }} <a href="https://pterodactyl.io/">Pterodactyl Software</a>.
++                &copy; {{ date('Y') }} DiamondCrew Interactive &middot; DiamondCrew Server Manager
+             </footer>
+         </div>
+         @section('footer-scripts')
+diff --git a/resources/views/templates/wrapper.blade.php b/resources/views/templates/wrapper.blade.php
+index a2d218a..1c0926f 100644
+--- a/resources/views/templates/wrapper.blade.php
++++ b/resources/views/templates/wrapper.blade.php
+@@ -1,7 +1,7 @@
+ <!DOCTYPE html>
+ <html>
+     <head>
+-        <title>{{ config('app.name', 'Pterodactyl') }}</title>
++        <title>DiamondCrew Server Manager</title>
+ 
+         @section('meta')
+             <meta charset="utf-8">
+@@ -9,14 +9,8 @@
+             <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+             <meta name="csrf-token" content="{{ csrf_token() }}">
+             <meta name="robots" content="noindex">
+-            <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+-            <link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+-            <link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+-            <link rel="manifest" href="/favicons/manifest.json">
+-            <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#bc6e3c">
+-            <link rel="shortcut icon" href="/favicons/favicon.ico">
+-            <meta name="msapplication-config" content="/favicons/browserconfig.xml">
+-            <meta name="theme-color" content="#0e4688">
++        @include('partials.diamondcrew.head')
++            <link rel="stylesheet" href="/branding/diamondcrew/client.css?v={{ filemtime(public_path('branding/diamondcrew/client.css')) }}">
+         @show
+ 
+         @section('user-data')
+@@ -36,7 +30,7 @@
+ 
+         @include('layouts.scripts')
+     </head>
+-    <body class="{{ $css['body'] ?? 'bg-neutral-50' }}">
++    <body class="dc-client {{ $css['body'] ?? 'bg-neutral-50' }}">
+         @section('content')
+             @yield('above-container')
+             @yield('container')
+diff --git a/tailwind.config.js b/tailwind.config.js
+index 7c814bd..4f7defe 100644
+--- a/tailwind.config.js
++++ b/tailwind.config.js
+@@ -1,4 +1,5 @@
+ const colors = require('tailwindcss/colors');
++const diamondcrew = require('./resources/diamondcrew/tokens.json');
+ 
+ const gray = {
+     50: 'hsl(216, 33%, 97%)',
+@@ -23,12 +24,14 @@ module.exports = {
+                 header: ['"IBM Plex Sans"', '"Roboto"', 'system-ui', 'sans-serif'],
+             },
+             colors: {
+-                black: '#131a20',
++                black: diamondcrew.background,
+                 // "primary" and "neutral" are deprecated, prefer the use of "blue" and "gray"
+                 // in new code.
+-                primary: colors.blue,
+-                gray: gray,
+-                neutral: gray,
++                primary: diamondcrew.blue,
++                blue: diamondcrew.blue,
++                gray: diamondcrew.gray,
++                neutral: diamondcrew.gray,
++                diamondcrew: { pink: diamondcrew.secondary, gold: diamondcrew.accent },
+                 cyan: colors.cyan,
+             },
+             fontSize: {

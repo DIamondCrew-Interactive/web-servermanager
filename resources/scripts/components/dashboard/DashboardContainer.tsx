@@ -54,6 +54,10 @@ export default () => {
 
     return (
         <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
+            <div css={tw`mb-8`}>
+                <h1 css={tw`text-3xl text-neutral-50 mb-2`}>Dashboard</h1>
+                <p css={tw`text-neutral-300`}>Manage your servers with DiamondCrew Server Manager.</p>
+            </div>
             {rootAdmin && (
                 <div css={tw`mb-2 flex justify-end items-center`}>
                     <p css={tw`uppercase text-xs text-neutral-400 mr-2`}>

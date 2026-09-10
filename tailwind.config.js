@@ -1,4 +1,5 @@
 const colors = require('tailwindcss/colors');
+const diamondcrew = require('./resources/diamondcrew/tokens.json');
 
 const gray = {
     50: 'hsl(216, 33%, 97%)',
@@ -23,12 +24,14 @@ module.exports = {
                 header: ['"IBM Plex Sans"', '"Roboto"', 'system-ui', 'sans-serif'],
             },
             colors: {
-                black: '#131a20',
+                black: diamondcrew.background,
                 // "primary" and "neutral" are deprecated, prefer the use of "blue" and "gray"
                 // in new code.
-                primary: colors.blue,
-                gray: gray,
-                neutral: gray,
+                primary: diamondcrew.blue,
+                blue: diamondcrew.blue,
+                gray: diamondcrew.gray,
+                neutral: diamondcrew.gray,
+                diamondcrew: { pink: diamondcrew.secondary, gold: diamondcrew.accent },
                 cyan: colors.cyan,
             },
             fontSize: {

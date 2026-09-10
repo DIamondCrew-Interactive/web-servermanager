@@ -1,0 +1,11 @@
+/* Shared React + Blade identity. Colors are generated from resources/diamondcrew/tokens.json. */
+.dc-brand { display: inline-flex; align-items: center; gap: 12px; vertical-align: middle; text-align: left; line-height: 1.2; }
+.dc-brand img { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0; }
+.dc-brand__copy { display: flex; flex-direction: column; gap: 3px; }
+.dc-brand__name { color: var(--dc-primary); background: var(--dc-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px; font-weight: 800; letter-spacing: -.7px; }
+.dc-brand__subtitle { color: var(--dc-muted); font-size: 13px; font-weight: 500; letter-spacing: .02em; }
+.dc-brand--large { flex-direction: column; text-align: center; gap: 16px; }
+.dc-brand--large img { width: 116px; height: 116px; }
+.dc-brand--large .dc-brand__name { font-size: 32px; }
+.dc-brand--large .dc-brand__subtitle { font-size: 16px; }
+@media (forced-colors: active) { .dc-brand__name { background: none; -webkit-text-fill-color: currentColor; } }

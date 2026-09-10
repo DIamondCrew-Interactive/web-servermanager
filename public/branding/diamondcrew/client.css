@@ -1,0 +1,35 @@
+body.dc-client {
+    color-scheme: dark;
+    background: radial-gradient(ellipse at 90% 0%, #ef45b508, transparent 35%), var(--dc-background);
+    color: var(--dc-text);
+    min-height: 100vh;
+}
+.dc-client .dc-header { background: var(--dc-background); border-bottom: 1px solid var(--dc-border); }
+.dc-client .dc-header > div { min-height: 80px; }
+.dc-client #logo > a { display: inline-flex; padding: 10px 16px; }
+.dc-client .dc-auth { max-width: 540px; margin: 0 auto; padding: 24px; position: relative; }
+.dc-client .dc-auth::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    background: linear-gradient(130deg, transparent 13%, #20a9f512 13.1%, transparent 24%),
+        linear-gradient(130deg, transparent 79%, #ef45b511 79.1%, transparent 90%),
+        linear-gradient(130deg, transparent 83%, #d9b65355 83.1%, #d9b65355 83.3%, transparent 83.4%);
+}
+.dc-client .dc-auth__brand { text-align: center; margin-bottom: 24px; }
+.dc-client .dc-auth__form { width: 100%; padding: 28px; background: var(--dc-surface); border: 1px solid var(--dc-border); border-radius: 12px; box-shadow: 0 24px 80px #0005; }
+.dc-client .dc-auth h2 { font-size: 22px; margin-bottom: 10px; }
+.dc-client .dc-auth label { color: var(--dc-muted); }
+.dc-client .dc-auth input:not([type=checkbox]):not([type=radio]) { background: var(--dc-background); color: var(--dc-text); }
+.dc-client .dc-auth a { color: var(--dc-muted); }
+.dc-client .dc-auth a:hover { color: var(--dc-primary); }
+.dc-client .dc-auth .cursor-pointer { color: var(--dc-muted); }
+.dc-client .dc-auth .cursor-pointer:hover { color: var(--dc-primary); }
+.dc-client .dc-footer { border-top: 1px solid var(--dc-border); padding: 20px 0; color: var(--dc-muted); text-align: center; font-size: 12px; }
+.dc-client :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--dc-primary); outline-offset: 3px; }
+@media (max-width: 640px) {
+    .dc-client .dc-header > div { flex-wrap: wrap; height: auto; }
+    .dc-client .dc-header #logo { flex-basis: 100%; }
+    .dc-client .dc-header #logo + div { width: 100%; height: 48px; justify-content: space-around; }
+    .dc-client .dc-header #logo + div > :is(a, button, .navigation-link) { padding-left: 16px; padding-right: 16px; }
+    .dc-client .dc-auth { padding: 16px; }
+    .dc-client .dc-auth__form { padding: 20px; }
+}

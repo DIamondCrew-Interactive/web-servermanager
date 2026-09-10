@@ -35,3 +35,14 @@ resources/lang/locales.js
 /public/build
 /public/hot
 result
+
+# DiamondCrew local backups, release artifacts and runtime state
+/.diamondcrew-backup/
+/panel.tar.gz
+/bootstrap/cache/*.php
+/storage/**
+/public/assets/*
+!/public/assets/svgs/
+
+# Keep only the distributable environment template, never the live .env.
+!.env.example
